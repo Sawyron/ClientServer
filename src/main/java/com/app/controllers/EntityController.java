@@ -1,7 +1,7 @@
-package com.app.domain.controllers;
+package com.app.controllers;
 
-import com.app.domain.models.AliveEntity;
-import com.app.domain.models.HabitatModel;
+import com.app.domain.AliveEntity;
+import com.app.domain.HabitatModel;
 import com.app.services.GraphicEntityFactory;
 import com.app.services.RunnableWorker;
 import com.app.ui.graphicentity.GraphicEntityView;
@@ -24,25 +24,6 @@ public class EntityController {
     public EntityController(HabitatModel model, GraphicEntityView view) {
         this.model = model;
         this.view = view;
-        RunnableWorker creator = new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                createEntity();
-            }
-        };
-        workers.add(creator);
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                removeDeadEntities();
-                try {
-                    Thread.sleep(checkDeadPeriod);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
 
         view.addStartActionListener((e) -> {
             resume();
@@ -61,8 +42,6 @@ public class EntityController {
                 System.exit(0);
             }
         });
-
-        start();
     }
 
     public void addAliveEntityType(GraphicEntityFactory factory, long spawnPeriod) {
@@ -70,7 +49,7 @@ public class EntityController {
         checkDeadPeriod = Math.max(spawnPeriod, checkDeadPeriod);
     }
 
-    private void createEntity() {
+    private void spawnEntityAndSleep() {
         for (Map.Entry<GraphicEntityFactory, Long> pair : entityFactoryMap.entrySet()) {
             String id = UUID.randomUUID().toString();
             long spawnPeriod = pair.getValue();
@@ -85,6 +64,7 @@ public class EntityController {
                 Thread.sleep(spawnPeriod);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                throw new ControllerException(e.getMessage(), e);
             }
         }
     }
@@ -112,15 +92,6 @@ public class EntityController {
         pauseTime = System.currentTimeMillis();
     }
 
-    private void start() {
-        model.clear();
-        view.clearEntities();
-        for (RunnableWorker worker : workers) {
-            worker.pause();
-            executorService.submit(worker);
-        }
-    }
-
     private void resume() {
         for (RunnableWorker worker : workers) {
             worker.resume();
@@ -130,5 +101,30 @@ public class EntityController {
 
     public void run() {
         view.run();
+        RunnableWorker creator = new RunnableWorker() {
+            @Override
+            protected void doUnitOfWork() {
+                spawnEntityAndSleep();
+            }
+        };
+        workers.add(creator);
+        workers.add(new RunnableWorker() {
+            @Override
+            protected void doUnitOfWork() {
+                removeDeadEntities();
+                try {
+                    Thread.sleep(checkDeadPeriod);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new ControllerException(e.getMessage(), e);
+                }
+            }
+        });
+        model.clear();
+        view.clearEntities();
+        for (RunnableWorker worker : workers) {
+            worker.pause();
+            executorService.submit(worker);
+        }
     }
 }

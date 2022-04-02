@@ -1,6 +1,6 @@
 package com.app.services;
 
-import com.app.domain.models.GraphicEntity;
+import com.app.domain.GraphicEntity;
 
 public interface GraphicEntityFactory {
     GraphicEntity createEntity(int x, int y);

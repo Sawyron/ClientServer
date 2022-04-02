@@ -1,6 +1,6 @@
 package com.app.ui.graphicentity;
 
-import com.app.domain.models.GraphicEntity;
+import com.app.domain.GraphicEntity;
 
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;

@@ -1,7 +1,7 @@
 package com.app.services;
 
-import com.app.domain.models.GraphicEntity;
-import com.app.domain.models.ImageGraphicEntity;
+import com.app.domain.GraphicEntity;
+import com.app.domain.ImageGraphicEntity;
 
 import java.awt.*;
 

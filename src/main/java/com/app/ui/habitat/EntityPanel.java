@@ -1,13 +1,11 @@
 package com.app.ui.habitat;
 
 
-import com.app.domain.models.GraphicEntity;
+import com.app.domain.GraphicEntity;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class EntityPanel extends JPanel {

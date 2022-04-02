@@ -1,6 +1,7 @@
 package com.app.ui.habitat;
 
-import com.app.domain.models.GraphicEntity;
+import com.app.domain.GraphicEntity;
+import com.app.ui.UIException;
 import com.app.ui.graphicentity.GraphicEntityView;
 
 import javax.swing.*;
@@ -62,12 +63,8 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
                     UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Unable to set system look and fell", JOptionPane.WARNING_MESSAGE);
+            throw new UIException(e.getMessage(), e);
         }
-    }
-
-    public HabitatFrame() {
-        this(400, 300);
     }
 
     @Override
