@@ -7,9 +7,11 @@ import java.awt.*;
 
 public class ImageGraphicEntityFactory implements GraphicEntityFactory {
     private final Image image;
+    private final long lifeTimeInMs;
 
-    public ImageGraphicEntityFactory(Image image) {
+    public ImageGraphicEntityFactory(Image image, long lifeTimeInMs) {
         this.image = image;
+        this.lifeTimeInMs = lifeTimeInMs;
     }
 
     @Override
@@ -20,5 +22,10 @@ public class ImageGraphicEntityFactory implements GraphicEntityFactory {
     @Override
     public GraphicEntity createEntity(int x, int y, int dx, int dy) {
         return new ImageGraphicEntity(x, y, dx, dy, image);
+    }
+
+    @Override
+    public long getEntityLifeTimeInMs() {
+        return lifeTimeInMs;
     }
 }
