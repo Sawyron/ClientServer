@@ -21,10 +21,12 @@ public class EntityPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 String id = null;
-                for (Map.Entry<String, GraphicEntity> pair : entityIdMap.entrySet()) {
-                    if (pair.getValue().isPointInside(e.getX(), e.getY())) {
-                        id = pair.getKey();
-                        break;
+                synchronized (EntityPanel.this) {
+                    for (Map.Entry<String, GraphicEntity> pair : entityIdMap.entrySet()) {
+                        if (pair.getValue().isPointInside(e.getX(), e.getY())) {
+                            id = pair.getKey();
+                            break;
+                        }
                     }
                 }
                 if (id != null)
@@ -35,8 +37,8 @@ public class EntityPanel extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
         synchronized (this) {
+            super.paint(g);
             for (GraphicEntity entity : entityIdMap.values()) {
                 entity.paint(g);
             }
