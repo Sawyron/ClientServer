@@ -17,9 +17,9 @@ public class App {
         try {
             Image birdImage = new ImageIcon(Objects.requireNonNull(App.class.getResource("/bird.png"))).getImage();
             Image nestlingImage = new ImageIcon(Objects.requireNonNull(App.class.getResource("/nestling.gif"))).getImage();
-            ImageGraphicEntityFactory birdFactory = new ImageGraphicEntityFactory(birdImage, 5000);
-            birdFactory.setImageSize(100,120);
-            ImageGraphicEntityFactory nestlingFactory = new ImageGraphicEntityFactory(nestlingImage, 5000);
+            ImageGraphicEntityFactory birdFactory = new ImageGraphicEntityFactory(birdImage, 10_000);
+            birdFactory.setImageSize(100, 120);
+            ImageGraphicEntityFactory nestlingFactory = new ImageGraphicEntityFactory(nestlingImage, 10_000);
             HabitatFrame frame = new HabitatFrame(500, 400);
             HabitatModel model = new HabitatModel();
             EntityController controller = new EntityController(model, frame);

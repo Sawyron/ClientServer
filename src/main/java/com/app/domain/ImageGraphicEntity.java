@@ -25,4 +25,20 @@ public class ImageGraphicEntity extends GraphicEntity {
     public void paint(Graphics g) {
         g.drawImage(image, super.getX(), super.getY(), width, height, null);
     }
+
+    @Override
+    public boolean isPointInside(int x, int y) {
+        return (x >= getX() && x <= getX() + width) && (y >= getY() && y <= y + height);
+    }
+
+    @Override
+    public boolean isMovingOutOfAreaWidth(int width) {
+        return (getX() + this.width >= width && getDx() > 0) || (getX() <= 0 && getDx() < 0);
+    }
+
+    @Override
+    public boolean isMovingOutOfAreaHeight(int height) {
+        return (getY() + this.height >= height && getDy() > 0) || (getY() <= 0 && getDy() < 0);
+    }
+
 }

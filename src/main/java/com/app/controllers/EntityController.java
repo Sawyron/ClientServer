@@ -31,12 +31,17 @@ public class EntityController {
 
         view.addStartActionListener((e) -> {
             resume();
-            model.clear();
-            view.clearEntities();
+            synchronized (model) {
+                model.clear();
+            }
+            synchronized (view) {
+                view.clearEntities();
+            }
         });
         view.addStopActionListener((e) -> pause());
         view.addPauseActionListener((e) -> pause());
         view.addResumeActionLister((e) -> resume());
+        view.addEntityClickedListener(this::removeEntityById);
 
         view.addWindowAction(new WindowAdapter() {
             @Override
@@ -66,7 +71,7 @@ public class EntityController {
                 view.addEntity(
                         factory.createEntity(
                                 random.nextInt(view.getWidth()), random.nextInt(view.getHeight()),
-                                random.nextInt(10)-5, random.nextInt(10)-5),
+                                random.nextInt(10) - 5, random.nextInt(10) - 5),
                         id
 
                 );
@@ -80,12 +85,24 @@ public class EntityController {
         }
     }
 
+    private void removeEntityById(String id) {
+        synchronized (view) {
+            view.removeEntity(id);
+        }
+        synchronized (model) {
+            model.removeEntity(id);
+        }
+    }
+
     private void removeDeadEntities() {
         List<String> deadEntitiesIds = List.copyOf(model.getDeadEntitiesIds(System.currentTimeMillis()));
         synchronized (view) {
             for (String id : deadEntitiesIds) {
                 view.removeEntity(id);
             }
+        }
+        synchronized (model) {
+            model.removeEntitiesByIds(deadEntitiesIds);
         }
     }
 
@@ -138,20 +155,6 @@ public class EntityController {
                 removeDeadEntities();
                 try {
                     Thread.sleep(checkDeadPeriod);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    throw new ControllerException(e.getMessage(), e);
-                }
-            }
-        });
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                synchronized (view) {
-                    view.update();
-                }
-                try {
-                    Thread.sleep(viewUpdatePeriodInMs);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     throw new ControllerException(e.getMessage(), e);

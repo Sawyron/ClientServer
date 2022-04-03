@@ -23,10 +23,18 @@ public class HabitatModel {
         addEntity(entity, System.currentTimeMillis());
     }
 
-    public void clear(){
+    public boolean removeEntity(String id) {
+        return entityBirthTime.entrySet().removeIf(e -> e.getKey().getId().equals(id));
+    }
+
+    public void clear() {
         entityBirthTime.clear();
     }
-    
+
+    public void removeEntitiesByIds(Collection<String> ids) {
+        entityBirthTime.entrySet().removeIf(e -> ids.contains(e.getKey().getId()));
+    }
+
     public void increaseLifeTime(long time) {
         entityBirthTime.replaceAll((e, v) -> entityBirthTime.get(e) + time);
     }
