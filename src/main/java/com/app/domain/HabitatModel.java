@@ -26,7 +26,7 @@ public class HabitatModel {
     public void clear(){
         entityBirthTime.clear();
     }
-
+    
     public void increaseLifeTime(long time) {
         entityBirthTime.replaceAll((e, v) -> entityBirthTime.get(e) + time);
     }

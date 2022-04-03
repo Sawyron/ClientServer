@@ -32,4 +32,10 @@ public class EntityPanel extends JPanel {
         entityIdMap.clear();
         repaint();
     }
+
+	public void moveEntity() {
+		for (GraphicEntity entity : entityIdMap.values()) {
+           entity.move();
+        }
+	}
 }

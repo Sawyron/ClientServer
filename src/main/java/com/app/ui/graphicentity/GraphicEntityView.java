@@ -17,5 +17,6 @@ public interface GraphicEntityView {
     void addWindowAction(WindowListener l);
     int getWidth();
     int getHeight();
+    void moveEntities();
     void run();
 }

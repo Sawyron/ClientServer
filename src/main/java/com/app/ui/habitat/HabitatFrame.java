@@ -116,4 +116,10 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     public void removeEntity(String id) {
         entityPanel.removeEntity(id);
     }
+
+	@Override
+	public void moveEntities() {
+		entityPanel.moveEntity();
+		
+	}
 }

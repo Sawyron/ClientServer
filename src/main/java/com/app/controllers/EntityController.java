@@ -57,8 +57,9 @@ public class EntityController {
             model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
             Random random = new Random();
             view.addEntity(
-                    factory.createEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight())),
+                    factory.createEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), random.nextInt(10), random.nextInt(10)),
                     id
+      
             );
             try {
                 Thread.sleep(spawnPeriod);
@@ -78,6 +79,15 @@ public class EntityController {
         }
     }
 
+    private void moveEntities() {
+        List<String> EntitiesIds = List.copyOf(model.getDeadEntitiesIds(System.currentTimeMillis()));
+        synchronized (view) {
+            for (String id : EntitiesIds) {
+                view.removeEntity(id);
+            }
+        }
+    }
+    
     private void shutdown() {
         for (RunnableWorker worker : workers) {
             worker.finish();
@@ -105,6 +115,7 @@ public class EntityController {
             @Override
             protected void doUnitOfWork() {
                 spawnEntityAndSleep();
+                view.moveEntities();
             }
         };
         workers.add(creator);
