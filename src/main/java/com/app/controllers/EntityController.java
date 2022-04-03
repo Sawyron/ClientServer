@@ -57,7 +57,7 @@ public class EntityController {
             model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
             Random random = new Random();
             view.addEntity(
-                    factory.createEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), random.nextInt(10), random.nextInt(10)),
+                    factory.createEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), random.nextInt(20) - 10, random.nextInt(20) - 10),
                     id
       
             );
