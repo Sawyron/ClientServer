@@ -34,6 +34,11 @@ public class EntityPanel extends JPanel {
     public void moveEntity() {
         for (GraphicEntity entity : entityIdMap.values()) {
             entity.move();
+            if (entity.getX() >= this.getWidth() || entity.getX() <= 0)
+            	entity.setDx(-entity.getDx());
+            if (entity.getY() >= this.getHeight() || entity.getY() <= 0)
+            	entity.setDy(-entity.getDy());
+            	
         }
     }
 }

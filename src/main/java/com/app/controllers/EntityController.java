@@ -66,7 +66,7 @@ public class EntityController {
                 view.addEntity(
                         factory.createEntity(
                                 random.nextInt(view.getWidth()), random.nextInt(view.getHeight()),
-                                2, 2),
+                                random.nextInt(10)-5, random.nextInt(10)-5),
                         id
 
                 );
