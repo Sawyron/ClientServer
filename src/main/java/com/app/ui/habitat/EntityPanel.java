@@ -21,21 +21,19 @@ public class EntityPanel extends JPanel {
 
     public void addEntity(GraphicEntity entity, String id) {
         entityIdMap.put(id, entity);
-        repaint();
     }
 
     void removeEntity(String id) {
-        GraphicEntity removed = entityIdMap.remove(id);
+        entityIdMap.remove(id);
     }
 
     void clear() {
         entityIdMap.clear();
-        repaint();
     }
 
-	public void moveEntity() {
-		for (GraphicEntity entity : entityIdMap.values()) {
-           entity.move();
+    public void moveEntity() {
+        for (GraphicEntity entity : entityIdMap.values()) {
+            entity.move();
         }
-	}
+    }
 }

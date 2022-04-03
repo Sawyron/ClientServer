@@ -103,6 +103,11 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     }
 
     @Override
+    public void update() {
+        entityPanel.repaint();
+    }
+
+    @Override
     public void addEntity(GraphicEntity entity, String id) {
         entityPanel.addEntity(entity, id);
     }
@@ -117,9 +122,8 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         entityPanel.removeEntity(id);
     }
 
-	@Override
-	public void moveEntities() {
-		entityPanel.moveEntity();
-		
-	}
+    @Override
+    public void moveEntities() {
+        entityPanel.moveEntity();
+    }
 }

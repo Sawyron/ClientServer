@@ -15,15 +15,16 @@ public class App {
     public static void main(String[] args) {
         MessageService messageService = new JMessageService();
         try {
-            Image birdImage1 = new ImageIcon(Objects.requireNonNull(App.class.getResource("/bird.png"))).getImage();
-            Image birdImage2 = new ImageIcon(Objects.requireNonNull(App.class.getResource("/nestling.gif"))).getImage();
-            ImageGraphicEntityFactory factory1 = new ImageGraphicEntityFactory(birdImage1, 5000);
-            ImageGraphicEntityFactory factory2 = new ImageGraphicEntityFactory(birdImage2, 5000);
+            Image birdImage = new ImageIcon(Objects.requireNonNull(App.class.getResource("/bird.png"))).getImage();
+            Image nestlingImage = new ImageIcon(Objects.requireNonNull(App.class.getResource("/nestling.gif"))).getImage();
+            ImageGraphicEntityFactory birdFactory = new ImageGraphicEntityFactory(birdImage, 5000);
+            birdFactory.setImageSize(100,120);
+            ImageGraphicEntityFactory nestlingFactory = new ImageGraphicEntityFactory(nestlingImage, 5000);
             HabitatFrame frame = new HabitatFrame(500, 400);
             HabitatModel model = new HabitatModel();
             EntityController controller = new EntityController(model, frame);
-            controller.addAliveEntityType(factory1, 500);
-            controller.addAliveEntityType(factory2, 500);
+            controller.addAliveEntityType(birdFactory, 500);
+            controller.addAliveEntityType(nestlingFactory, 500);
             controller.run();
         } catch (Exception e) {
             messageService.showMessage(e.getMessage());

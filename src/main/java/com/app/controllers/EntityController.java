@@ -16,8 +16,12 @@ public class EntityController {
     private final HabitatModel model;
     private final GraphicEntityView view;
     private final Map<GraphicEntityFactory, Long> entityFactoryMap = new HashMap<>();
+
     private final List<RunnableWorker> workers = new LinkedList<>();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
+
+    private long viewUpdatePeriodInMs = 20;
+    private long movementPeriodInMs = 50;
     private long checkDeadPeriod = 500;
     private long pauseTime;
 
@@ -54,13 +58,19 @@ public class EntityController {
             String id = UUID.randomUUID().toString();
             long spawnPeriod = pair.getValue();
             GraphicEntityFactory factory = pair.getKey();
-            model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
+            synchronized (model) {
+                model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
+            }
             Random random = new Random();
-            view.addEntity(
-                    factory.createEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), random.nextInt(20) - 10, random.nextInt(20) - 10),
-                    id
-      
-            );
+            synchronized (view) {
+                view.addEntity(
+                        factory.createEntity(
+                                random.nextInt(view.getWidth()), random.nextInt(view.getHeight()),
+                                2, 2),
+                        id
+
+                );
+            }
             try {
                 Thread.sleep(spawnPeriod);
             } catch (InterruptedException e) {
@@ -79,15 +89,6 @@ public class EntityController {
         }
     }
 
-    private void moveEntities() {
-        List<String> EntitiesIds = List.copyOf(model.getDeadEntitiesIds(System.currentTimeMillis()));
-        synchronized (view) {
-            for (String id : EntitiesIds) {
-                view.removeEntity(id);
-            }
-        }
-    }
-    
     private void shutdown() {
         for (RunnableWorker worker : workers) {
             worker.finish();
@@ -111,14 +112,26 @@ public class EntityController {
 
     public void run() {
         view.run();
-        RunnableWorker creator = new RunnableWorker() {
+        workers.add(new RunnableWorker() {
             @Override
             protected void doUnitOfWork() {
                 spawnEntityAndSleep();
-                view.moveEntities();
             }
-        };
-        workers.add(creator);
+        });
+        workers.add(new RunnableWorker() {
+            @Override
+            protected void doUnitOfWork() {
+                synchronized (view) {
+                    view.moveEntities();
+                }
+                try {
+                    Thread.sleep(movementPeriodInMs);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new ControllerException(e.getMessage(), e);
+                }
+            }
+        });
         workers.add(new RunnableWorker() {
             @Override
             protected void doUnitOfWork() {
@@ -131,11 +144,39 @@ public class EntityController {
                 }
             }
         });
-        model.clear();
-        view.clearEntities();
+        workers.add(new RunnableWorker() {
+            @Override
+            protected void doUnitOfWork() {
+                synchronized (view) {
+                    view.update();
+                }
+                try {
+                    Thread.sleep(viewUpdatePeriodInMs);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new ControllerException(e.getMessage(), e);
+                }
+            }
+        });
         for (RunnableWorker worker : workers) {
             worker.pause();
             executorService.submit(worker);
         }
+    }
+
+    public long getViewUpdatePeriodInMs() {
+        return viewUpdatePeriodInMs;
+    }
+
+    public void setViewUpdatePeriodInMs(long viewUpdatePeriodInMs) {
+        this.viewUpdatePeriodInMs = viewUpdatePeriodInMs;
+    }
+
+    public long getMovementPeriodInMs() {
+        return movementPeriodInMs;
+    }
+
+    public void setMovementPeriodInMs(long movementPeriodInMs) {
+        this.movementPeriodInMs = movementPeriodInMs;
     }
 }

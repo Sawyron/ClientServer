@@ -19,4 +19,5 @@ public interface GraphicEntityView {
     int getHeight();
     void moveEntities();
     void run();
+    void update();
 }
