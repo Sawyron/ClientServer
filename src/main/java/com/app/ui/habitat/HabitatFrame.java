@@ -2,6 +2,8 @@ package com.app.ui.habitat;
 
 import com.app.domain.GraphicEntity;
 import com.app.ui.UIException;
+import com.app.ui.graphicentity.AreaPointClickedListener;
+import com.app.ui.graphicentity.EntityClickedListener;
 import com.app.ui.graphicentity.GraphicEntityView;
 
 import javax.swing.*;
@@ -108,13 +110,48 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     }
 
     @Override
-    public void addEntityClickedListener(EntityClickedListener l) {
-        entityPanel.addEntityClickedListener(l);
+    public void addEntityRightButtonClickedListener(EntityClickedListener l) {
+        entityPanel.addEntityRightButtonClickedListener(l);
     }
 
     @Override
-    public boolean removeEntityClickedListener(EntityClickedListener l) {
-        return entityPanel.removeEntityClickedListener(l);
+    public boolean removeEntityRightButtonClickedListener(EntityClickedListener l) {
+        return entityPanel.removeEntityRightClickedListener(l);
+    }
+
+    @Override
+    public void addEntityLeftButtonClickedListener(EntityClickedListener l) {
+        entityPanel.addEntityLeftButtonClickedListener(l);
+    }
+
+    @Override
+    public boolean removeEntityLeftButtonClickedListener(EntityClickedListener l) {
+        return entityPanel.removeEntityLeftButtonClickedListener(l);
+    }
+
+    @Override
+    public void addAreaPointLeftButtonClickedListener(AreaPointClickedListener l) {
+        entityPanel.addAreaPointLeftClickedListener(l);
+    }
+
+    @Override
+    public boolean removeAreaPointLeftButtonClickedListener(AreaPointClickedListener l) {
+        return entityPanel.removeAreaPointLeftClickedListener(l);
+    }
+
+    @Override
+    public void addAreaPointRightButtonClickedListener(AreaPointClickedListener l) {
+        entityPanel.addAreaPointRightClickedListener(l);
+    }
+
+    @Override
+    public boolean removeAreaPointRightButtonClickedListener(AreaPointClickedListener l) {
+        return entityPanel.removeAreaPointRightClickedListener(l);
+    }
+
+    @Override
+    public void clearClickListeners() {
+        entityPanel.clearMouseListeners();
     }
 
     @Override
@@ -125,6 +162,11 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     @Override
     public void clearEntities() {
         entityPanel.clear();
+    }
+
+    @Override
+    public GraphicEntity getEntityById(String id) {
+        return entityPanel.getEntityById(id);
     }
 
     @Override

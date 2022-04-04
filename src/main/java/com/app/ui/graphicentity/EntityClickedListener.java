@@ -1,4 +1,4 @@
-package com.app.ui.habitat;
+package com.app.ui.graphicentity;
 
 @FunctionalInterface
 public interface EntityClickedListener {

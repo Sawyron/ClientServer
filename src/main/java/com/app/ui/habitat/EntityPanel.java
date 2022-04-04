@@ -2,6 +2,9 @@ package com.app.ui.habitat;
 
 
 import com.app.domain.GraphicEntity;
+import com.app.ui.UIException;
+import com.app.ui.graphicentity.AreaPointClickedListener;
+import com.app.ui.graphicentity.EntityClickedListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,12 +17,15 @@ import java.util.Map;
 
 public class EntityPanel extends JPanel {
     private final Map<String, GraphicEntity> entityIdMap = new HashMap<>();
-    private final List<EntityClickedListener> listeners = new LinkedList<>();
+    private final List<EntityClickedListener> entityRightListeners = new LinkedList<>();
+    private final List<EntityClickedListener> entityLeftListeners = new LinkedList<>();
+    private final List<AreaPointClickedListener> areaPointLeftClickedListeners = new LinkedList<>();
+    private final List<AreaPointClickedListener> areaPointRightClickedListeners = new LinkedList<>();
 
     public EntityPanel() {
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 String id = null;
                 synchronized (EntityPanel.this) {
                     for (Map.Entry<String, GraphicEntity> pair : entityIdMap.entrySet()) {
@@ -29,8 +35,20 @@ public class EntityPanel extends JPanel {
                         }
                     }
                 }
-                if (id != null)
-                    invokeListeners(id);
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    if (id != null) {
+                        invokeEntityRightListeners(id);
+                    } else {
+                        invokeAreaPointRightClickListeners(e.getX(), e.getY());
+                    }
+                }
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    if (id != null) {
+                        invokeEntityLeftClickListeners(id);
+                    } else {
+                        invokeAreaPointLeftListeners(e.getX(), e.getY());
+                    }
+                }
             }
         });
     }
@@ -45,6 +63,10 @@ public class EntityPanel extends JPanel {
         }
     }
 
+    public GraphicEntity getEntityById(String id) {
+        return entityIdMap.get(id);
+    }
+
     public synchronized void moveEntities() {
         for (GraphicEntity entity : entityIdMap.values()) {
             entity.move();
@@ -55,6 +77,31 @@ public class EntityPanel extends JPanel {
         }
         repaint();
     }
+
+    private synchronized void invokeEntityRightListeners(String id) {
+        for (EntityClickedListener listener : entityRightListeners) {
+            listener.EntityClicked(id);
+        }
+    }
+
+    private synchronized void invokeEntityLeftClickListeners(String id) {
+        for (EntityClickedListener listener : entityLeftListeners) {
+            listener.EntityClicked(id);
+        }
+    }
+
+    private synchronized void invokeAreaPointRightClickListeners(int x, int y) {
+        for (AreaPointClickedListener listener : areaPointRightClickedListeners) {
+            listener.pointClicked(x, y);
+        }
+    }
+
+    private synchronized void invokeAreaPointLeftListeners(int x, int y) {
+        for (AreaPointClickedListener listener : areaPointLeftClickedListeners) {
+            listener.pointClicked(x, y);
+        }
+    }
+
 
     public synchronized void addEntity(GraphicEntity entity, String id) {
         entityIdMap.put(id, entity);
@@ -70,17 +117,39 @@ public class EntityPanel extends JPanel {
         entityIdMap.clear();
     }
 
-    public synchronized void addEntityClickedListener(EntityClickedListener l) {
-        listeners.add(l);
+    public synchronized void addEntityRightButtonClickedListener(EntityClickedListener l) {
+        entityRightListeners.add(l);
     }
 
-    public synchronized boolean removeEntityClickedListener(EntityClickedListener l) {
-        return listeners.remove(l);
+    public synchronized boolean removeEntityRightClickedListener(EntityClickedListener l) {
+        return entityRightListeners.remove(l);
     }
 
-    private synchronized void invokeListeners(String id) {
-        for (EntityClickedListener listener : listeners) {
-            listener.EntityClicked(id);
-        }
+    public void clearMouseListeners() {
+        entityRightListeners.clear();
+    }
+
+    public void addAreaPointLeftClickedListener(AreaPointClickedListener l) {
+        areaPointLeftClickedListeners.add(l);
+    }
+
+    boolean removeAreaPointLeftClickedListener(AreaPointClickedListener l) {
+        return areaPointLeftClickedListeners.remove(l);
+    }
+
+    public void addEntityLeftButtonClickedListener(EntityClickedListener l) {
+        entityLeftListeners.add(l);
+    }
+
+    public boolean removeEntityLeftButtonClickedListener(EntityClickedListener l) {
+        return entityLeftListeners.remove(l);
+    }
+
+    public void addAreaPointRightClickedListener(AreaPointClickedListener l) {
+        areaPointRightClickedListeners.add(l);
+    }
+
+    public boolean removeAreaPointRightClickedListener(AreaPointClickedListener l) {
+        return areaPointRightClickedListeners.remove(l);
     }
 }

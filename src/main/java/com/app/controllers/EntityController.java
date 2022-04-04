@@ -1,6 +1,7 @@
 package com.app.controllers;
 
 import com.app.domain.AliveEntity;
+import com.app.domain.GraphicEntity;
 import com.app.domain.HabitatModel;
 import com.app.services.GraphicEntityFactory;
 import com.app.services.RunnableWorker;
@@ -41,7 +42,27 @@ public class EntityController {
         view.addStopActionListener((e) -> pause());
         view.addPauseActionListener((e) -> pause());
         view.addResumeActionLister((e) -> resume());
-        view.addEntityClickedListener(this::removeEntityById);
+        view.addEntityRightButtonClickedListener(this::removeEntityById);
+        view.addAreaPointLeftButtonClickedListener((x, y) -> {
+            List<GraphicEntityFactory> factories = new ArrayList<>(entityFactoryMap.keySet());
+            Random random = new Random();
+            GraphicEntityFactory factory = factories.get(random.nextInt(factories.size()));
+            spawnEntity(x, y, factory);
+        });
+        view.addEntityLeftButtonClickedListener(id -> {
+            synchronized (view) {
+                GraphicEntity entity = view.getEntityById(id);
+                if (entity.getDx() == 0 && entity.getDy() == 0) {
+                    Random random = new Random();
+                    entity.setDx(random.nextInt(10) - 5);
+                    entity.setDy(random.nextInt(10) - 5);
+                } else {
+                    entity.setDy(0);
+                    entity.setDx(0);
+                }
+            }
+        });
+
 
         view.addWindowAction(new WindowAdapter() {
             @Override
@@ -51,6 +72,32 @@ public class EntityController {
                 System.exit(0);
             }
         });
+        workers.add(new RunnableWorker() {
+            @Override
+            protected void doUnitOfWork() {
+                synchronized (view) {
+                    view.moveEntities();
+                }
+                try {
+                    Thread.sleep(movementPeriodInMs);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new ControllerException(e.getMessage(), e);
+                }
+            }
+        });
+        workers.add(new RunnableWorker() {
+            @Override
+            protected void doUnitOfWork() {
+                try {
+                    Thread.sleep(checkDeadPeriod);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new ControllerException(e.getMessage(), e);
+                }
+                removeDeadEntities();
+            }
+        });
     }
 
     public void addAliveEntityType(GraphicEntityFactory factory, long spawnPeriod) {
@@ -58,30 +105,17 @@ public class EntityController {
         checkDeadPeriod = Math.max(spawnPeriod, checkDeadPeriod);
     }
 
-    private void spawnEntityAndSleep() {
-        for (Map.Entry<GraphicEntityFactory, Long> pair : entityFactoryMap.entrySet()) {
-            String id = UUID.randomUUID().toString();
-            long spawnPeriod = pair.getValue();
-            GraphicEntityFactory factory = pair.getKey();
-            synchronized (model) {
-                model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
-            }
-            Random random = new Random();
-            synchronized (view) {
-                view.addEntity(
-                        factory.createEntity(
-                                random.nextInt(view.getWidth()), random.nextInt(view.getHeight()),
-                                random.nextInt(10) - 5, random.nextInt(10) - 5),
-                        id
-
-                );
-            }
-            try {
-                Thread.sleep(spawnPeriod);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                throw new ControllerException(e.getMessage(), e);
-            }
+    private void spawnEntity(int x, int y, GraphicEntityFactory factory) {
+        String id = UUID.randomUUID().toString();
+        synchronized (model) {
+            model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
+        }
+        Random random = new Random();
+        synchronized (view) {
+            view.addEntity(
+                    factory.createEntity(x, y, random.nextInt(10) - 5, random.nextInt(10) - 5),
+                    id
+            );
         }
     }
 
@@ -96,13 +130,8 @@ public class EntityController {
 
     private void removeDeadEntities() {
         List<String> deadEntitiesIds = List.copyOf(model.getDeadEntitiesIds(System.currentTimeMillis()));
-        synchronized (view) {
-            for (String id : deadEntitiesIds) {
-                view.removeEntity(id);
-            }
-        }
-        synchronized (model) {
-            model.removeEntitiesByIds(deadEntitiesIds);
+        for (String id : deadEntitiesIds) {
+            removeEntityById(id);
         }
     }
 
@@ -124,43 +153,28 @@ public class EntityController {
         for (RunnableWorker worker : workers) {
             worker.resume();
         }
-        model.increaseLifeTime(System.currentTimeMillis() - pauseTime);
+        synchronized (model) {
+            model.increaseLifeTime(System.currentTimeMillis() - pauseTime);
+        }
     }
 
     public void run() {
+        for (Map.Entry<GraphicEntityFactory, Long> entry : entityFactoryMap.entrySet()) {
+            workers.add(new RunnableWorker() {
+                @Override
+                protected void doUnitOfWork() {
+                    Random random = new Random();
+                    spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entry.getKey());
+                    try {
+                        Thread.sleep(entry.getValue());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        throw new ControllerException(e.getMessage(), e);
+                    }
+                }
+            });
+        }
         view.run();
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                spawnEntityAndSleep();
-            }
-        });
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                synchronized (view) {
-                    view.moveEntities();
-                }
-                try {
-                    Thread.sleep(movementPeriodInMs);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    throw new ControllerException(e.getMessage(), e);
-                }
-            }
-        });
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                removeDeadEntities();
-                try {
-                    Thread.sleep(checkDeadPeriod);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    throw new ControllerException(e.getMessage(), e);
-                }
-            }
-        });
         for (RunnableWorker worker : workers) {
             worker.pause();
             executorService.submit(worker);

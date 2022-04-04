@@ -23,8 +23,8 @@ public class App {
             HabitatFrame frame = new HabitatFrame(500, 400);
             HabitatModel model = new HabitatModel();
             EntityController controller = new EntityController(model, frame);
-            controller.addAliveEntityType(birdFactory, 500);
-            controller.addAliveEntityType(nestlingFactory, 500);
+            controller.addAliveEntityType(birdFactory, 5_000);
+            controller.addAliveEntityType(nestlingFactory, 2_000);
             controller.run();
         } catch (Exception e) {
             messageService.showMessage(e.getMessage());
