@@ -1,4 +1,4 @@
-package com.app.services;
+package com.poultryfarm.services;
 
 public interface MessageService {
     void showMessage(String message);

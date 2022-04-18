@@ -1,4 +1,4 @@
-package com.app.services;
+package com.poultryfarm.services;
 
 public abstract class RunnableWorker implements Runnable {
     private volatile boolean stopped;

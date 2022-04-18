@@ -1,10 +1,10 @@
-package com.app.ui.habitat;
+package com.poultryfarm.ui.habitat;
 
-import com.app.domain.GraphicEntity;
-import com.app.ui.UIException;
-import com.app.ui.graphicentity.AreaPointClickedListener;
-import com.app.ui.graphicentity.EntityClickedListener;
-import com.app.ui.graphicentity.GraphicEntityView;
+import com.poultryfarm.domain.GraphicEntity;
+import com.poultryfarm.ui.UIException;
+import com.poultryfarm.ui.graphicentity.AreaPointClickedListener;
+import com.poultryfarm.ui.graphicentity.EntityClickedListener;
+import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 
 import javax.swing.*;
 import java.awt.*;

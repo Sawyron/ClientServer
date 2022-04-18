@@ -1,4 +1,4 @@
-package com.app.ui.graphicentity;
+package com.poultryfarm.ui.graphicentity;
 
 @FunctionalInterface
 public interface AreaPointClickedListener {

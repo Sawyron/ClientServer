@@ -1,11 +1,11 @@
-package com.app.controllers;
+package com.poultryfarm.controllers;
 
-import com.app.domain.AliveEntity;
-import com.app.domain.GraphicEntity;
-import com.app.domain.HabitatModel;
-import com.app.services.GraphicEntityFactory;
-import com.app.services.RunnableWorker;
-import com.app.ui.graphicentity.GraphicEntityView;
+import com.poultryfarm.domain.AliveEntity;
+import com.poultryfarm.domain.GraphicEntity;
+import com.poultryfarm.domain.HabitatModel;
+import com.poultryfarm.services.GraphicEntityFactory;
+import com.poultryfarm.services.RunnableWorker;
+import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

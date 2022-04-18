@@ -1,6 +1,6 @@
-package com.app.ui.graphicentity;
+package com.poultryfarm.ui.graphicentity;
 
-import com.app.domain.GraphicEntity;
+import com.poultryfarm.domain.GraphicEntity;
 
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;

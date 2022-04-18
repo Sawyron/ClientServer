@@ -1,7 +1,7 @@
-package com.app.services;
+package com.poultryfarm.services;
 
-import com.app.domain.GraphicEntity;
-import com.app.domain.ImageGraphicEntity;
+import com.poultryfarm.domain.GraphicEntity;
+import com.poultryfarm.domain.ImageGraphicEntity;
 
 import java.awt.*;
 

@@ -1,4 +1,4 @@
-package com.app.ui;
+package com.poultryfarm.ui;
 
 public class UIException extends RuntimeException{
     public UIException() {

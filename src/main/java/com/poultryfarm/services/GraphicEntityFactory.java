@@ -1,6 +1,6 @@
-package com.app.services;
+package com.poultryfarm.services;
 
-import com.app.domain.GraphicEntity;
+import com.poultryfarm.domain.GraphicEntity;
 
 public interface GraphicEntityFactory {
     GraphicEntity createEntity(int x, int y);

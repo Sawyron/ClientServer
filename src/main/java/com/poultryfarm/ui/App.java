@@ -1,11 +1,11 @@
-package com.app.ui;
+package com.poultryfarm.ui;
 
-import com.app.controllers.EntityController;
-import com.app.domain.HabitatModel;
-import com.app.services.ImageGraphicEntityFactory;
-import com.app.services.JMessageService;
-import com.app.services.MessageService;
-import com.app.ui.habitat.HabitatFrame;
+import com.poultryfarm.controllers.EntityController;
+import com.poultryfarm.domain.HabitatModel;
+import com.poultryfarm.services.ImageGraphicEntityFactory;
+import com.poultryfarm.services.JMessageService;
+import com.poultryfarm.services.MessageService;
+import com.poultryfarm.ui.habitat.HabitatFrame;
 
 import javax.swing.*;
 import java.awt.*;
