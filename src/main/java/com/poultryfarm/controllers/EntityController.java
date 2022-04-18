@@ -43,27 +43,8 @@ public class EntityController {
         view.addPauseActionListener((e) -> pause());
         view.addResumeActionLister((e) -> resume());
         view.addEntityRightButtonClickedListener(this::removeEntityById);
-        view.addAreaPointLeftButtonClickedListener((x, y) -> {
-            List<GraphicEntityFactory> factories = new ArrayList<>(entityFactoryMap.keySet());
-            Random random = new Random();
-            GraphicEntityFactory factory = factories.get(random.nextInt(factories.size()));
-            spawnEntity(x, y, factory);
-        });
-        view.addEntityLeftButtonClickedListener(id -> {
-            synchronized (view) {
-                GraphicEntity entity = view.getEntityById(id);
-                if (entity.getDx() == 0 && entity.getDy() == 0) {
-                    Random random = new Random();
-                    entity.setDx(random.nextInt(10) - 5);
-                    entity.setDy(random.nextInt(10) - 5);
-                } else {
-                    entity.setDy(0);
-                    entity.setDx(0);
-                }
-            }
-        });
-
-
+        view.addAreaPointLeftButtonClickedListener(this::spawnRandomEntityAt);
+        view.addEntityLeftButtonClickedListener(this::changeEntityMovingState);
         view.addWindowAction(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -98,6 +79,27 @@ public class EntityController {
                 removeDeadEntities();
             }
         });
+    }
+
+    private void changeEntityMovingState(String id) {
+        synchronized (view) {
+            GraphicEntity entity = view.getEntityById(id);
+            if (entity.getDx() == 0 && entity.getDy() == 0) {
+                Random random = new Random();
+                entity.setDx(random.nextInt(10) - 5);
+                entity.setDy(random.nextInt(10) - 5);
+            } else {
+                entity.setDy(0);
+                entity.setDx(0);
+            }
+        }
+    }
+
+    private void spawnRandomEntityAt(int x, int y) {
+        List<GraphicEntityFactory> factories = new ArrayList<>(entityFactoryMap.keySet());
+        Random random = new Random();
+        GraphicEntityFactory factory = factories.get(random.nextInt(factories.size()));
+        spawnEntity(x, y, factory);
     }
 
     public void addAliveEntityType(GraphicEntityFactory factory, long spawnPeriod) {

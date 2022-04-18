@@ -30,6 +30,7 @@ public abstract class GraphicEntity {
     abstract public boolean isPointInside(int x, int y);
 
     abstract public boolean isMovingOutOfAreaWidth(int width);
+
     abstract public boolean isMovingOutOfAreaHeight(int height);
 
     public int getX() {

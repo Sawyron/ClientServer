@@ -8,7 +8,8 @@ import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowListener;
 
 public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final EntityPanel entityPanel = new EntityPanel();
@@ -63,7 +64,8 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         try {
             UIManager.setLookAndFeel(
                     UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 UnsupportedLookAndFeelException e) {
             e.printStackTrace();
             throw new UIException(e.getMessage(), e);
         }
