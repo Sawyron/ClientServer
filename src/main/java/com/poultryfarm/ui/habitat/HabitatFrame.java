@@ -2,9 +2,7 @@ package com.poultryfarm.ui.habitat;
 
 import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.ui.UIException;
-import com.poultryfarm.ui.graphicentity.AreaPointClickedListener;
-import com.poultryfarm.ui.graphicentity.EntityClickedListener;
-import com.poultryfarm.ui.graphicentity.GraphicEntityView;
+import com.poultryfarm.ui.graphicentity.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +15,7 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final JButton stopButton = new JButton("Stop");
     private final JButton pauseButton = new JButton("Pause");
     private final JButton resumeButton = new JButton("Resume");
+    private final JMenu entitySerializerMenu = new JMenu("File");
 
     public HabitatFrame(int width, int height) {
         setSize(width, height);
@@ -61,6 +60,9 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         });
 
         setTitle("Poultry farm");
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(entitySerializerMenu);
+        setJMenuBar(menuBar);
         try {
             UIManager.setLookAndFeel(
                     UIManager.getSystemLookAndFeelClassName());
@@ -69,6 +71,29 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
             e.printStackTrace();
             throw new UIException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void addEntitySerializer(String name, LoadEntityListener loadListener, SaveEntityListener saveListener) {
+        JMenuItem saveItem = new JMenuItem("Save to " + name);
+        saveItem.addActionListener(e -> {
+            JFileChooser saveFileDialog = new JFileChooser();
+            int result = saveFileDialog.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                saveListener.onEntitySaving(saveFileDialog.getSelectedFile().getPath());
+            }
+        });
+        entitySerializerMenu.add(saveItem);
+        JMenuItem loadItem = new JMenuItem("Load from " + name);
+        loadItem.addActionListener(e -> {
+            JFileChooser loadFileDialog = new JFileChooser();
+            int result = loadFileDialog.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                loadListener.onEntityLoading(loadFileDialog.getSelectedFile().getPath());
+            }
+        });
+        entitySerializerMenu.addSeparator();
+
     }
 
     @Override

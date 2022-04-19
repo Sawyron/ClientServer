@@ -8,6 +8,8 @@ import java.awt.event.WindowListener;
 public interface GraphicEntityView {
     void addEntity(GraphicEntity entity, String id);
 
+    void addEntitySerializer(String name, LoadEntityListener loadListener, SaveEntityListener saveListener);
+
     void clearEntities();
 
     GraphicEntity getEntityById(String id);

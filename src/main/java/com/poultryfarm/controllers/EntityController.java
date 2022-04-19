@@ -3,6 +3,7 @@ package com.poultryfarm.controllers;
 import com.poultryfarm.domain.AliveEntity;
 import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.HabitatModel;
+import com.poultryfarm.services.EntitySpawn;
 import com.poultryfarm.services.GraphicEntityFactory;
 import com.poultryfarm.services.RunnableWorker;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
@@ -16,7 +17,7 @@ import java.util.concurrent.Executors;
 public class EntityController {
     private final HabitatModel model;
     private final GraphicEntityView view;
-    private final Map<GraphicEntityFactory, Long> entityFactoryMap = new HashMap<>();
+    private final List<EntitySpawn> entitySpawns = new LinkedList<>();
 
     private final List<RunnableWorker> workers = new LinkedList<>();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -96,26 +97,24 @@ public class EntityController {
     }
 
     private void spawnRandomEntityAt(int x, int y) {
-        List<GraphicEntityFactory> factories = new ArrayList<>(entityFactoryMap.keySet());
         Random random = new Random();
-        GraphicEntityFactory factory = factories.get(random.nextInt(factories.size()));
-        spawnEntity(x, y, factory);
+        EntitySpawn spawn = entitySpawns.get(random.nextInt(entitySpawns.size()));
+        spawnEntity(x, y, spawn);
     }
 
-    public void addAliveEntityType(GraphicEntityFactory factory, long spawnPeriod) {
-        entityFactoryMap.put(factory, spawnPeriod);
-        checkDeadPeriod = Math.max(spawnPeriod, checkDeadPeriod);
+    public void addEntitySpawn(EntitySpawn entitySpawn) {
+        entitySpawns.add(entitySpawn);
     }
 
-    private void spawnEntity(int x, int y, GraphicEntityFactory factory) {
+    private void spawnEntity(int x, int y, EntitySpawn entitySpawn) {
         String id = UUID.randomUUID().toString();
         synchronized (model) {
-            model.addEntity(new AliveEntity(id, factory.getEntityLifeTimeInMs()));
+            model.addEntity(new AliveEntity(id, entitySpawn.getLifeTimeInMs()));
         }
         Random random = new Random();
         synchronized (view) {
             view.addEntity(
-                    factory.createEntity(x, y, random.nextInt(10) - 5, random.nextInt(10) - 5),
+                    entitySpawn.createEntity(x, y, random.nextInt(10) - 5, random.nextInt(10) - 5),
                     id
             );
         }
@@ -161,14 +160,14 @@ public class EntityController {
     }
 
     public void run() {
-        for (Map.Entry<GraphicEntityFactory, Long> entry : entityFactoryMap.entrySet()) {
+        for (EntitySpawn entitySpawn : entitySpawns) {
             workers.add(new RunnableWorker() {
                 @Override
                 protected void doUnitOfWork() {
                     Random random = new Random();
-                    spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entry.getKey());
+                    spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entitySpawn);
                     try {
-                        Thread.sleep(entry.getValue());
+                        Thread.sleep(entitySpawn.getSpawnPeriodInMs());
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         throw new ControllerException(e.getMessage(), e);
@@ -197,5 +196,13 @@ public class EntityController {
 
     public void setMovementPeriodInMs(long movementPeriodInMs) {
         this.movementPeriodInMs = movementPeriodInMs;
+    }
+
+    public long getCheckDeadPeriod() {
+        return checkDeadPeriod;
+    }
+
+    public void setCheckDeadPeriod(long checkDeadPeriod) {
+        this.checkDeadPeriod = checkDeadPeriod;
     }
 }
