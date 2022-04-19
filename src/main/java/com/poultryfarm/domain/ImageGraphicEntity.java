@@ -2,11 +2,23 @@ package com.poultryfarm.domain;
 
 import java.awt.*;
 
+/**
+ * Graphic entity that paints an image
+ * @see GraphicEntity
+ */
 public class ImageGraphicEntity extends GraphicEntity {
     private final Image image;
     private final int width;
     private final int height;
 
+    /**
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param width Image's width
+     * @param height Image's height
+     * @param image AWT image to be painted
+     */
     public ImageGraphicEntity(int x, int y, int width, int height, Image image) {
         super(x, y);
         this.height = height;
@@ -14,13 +26,22 @@ public class ImageGraphicEntity extends GraphicEntity {
         this.image = image;
     }
 
+    /**
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param dx x-axis speed
+     * @param dy y-axis speed
+     * @param width Image's width
+     * @param height Image's height
+     * @param image AWT image to be painted
+     */
     public ImageGraphicEntity(int x, int y, int dx, int dy, int width, int height, Image image) {
         super(x, y, dx, dy);
         this.width = width;
         this.height = height;
         this.image = image;
     }
-
     @Override
     public void paint(Graphics g) {
         g.drawImage(image, super.getX(), super.getY(), width, height, null);
