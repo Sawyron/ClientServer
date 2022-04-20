@@ -5,9 +5,13 @@ import com.poultryfarm.ui.UIException;
 import com.poultryfarm.ui.graphicentity.*;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final EntityPanel entityPanel = new EntityPanel();
@@ -15,7 +19,10 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final JButton stopButton = new JButton("Stop");
     private final JButton pauseButton = new JButton("Pause");
     private final JButton resumeButton = new JButton("Resume");
-    private final JMenu entitySerializerMenu = new JMenu("File");
+    private final JFileChooser fileDialog = new JFileChooser();
+    private final List<LoadEntityListener> loadEntityListeners = new LinkedList<>();
+    private final List<SaveEntityListener> saveEntityListeners = new LinkedList<>();
+
 
     public HabitatFrame(int width, int height) {
         setSize(width, height);
@@ -61,39 +68,43 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
 
         setTitle("Poultry farm");
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(entitySerializerMenu);
+        menuBar.add(createMenu());
         setJMenuBar(menuBar);
-        try {
-            UIManager.setLookAndFeel(
-                    UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                 UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-            throw new UIException(e.getMessage(), e);
+    }
+
+    private JMenu createMenu() {
+        JMenu menu = new JMenu("File");
+        JMenuItem saveItem = new JMenuItem("Save");
+        saveItem.addActionListener(e -> {
+            fileDialog.setCurrentDirectory(new File("").getAbsoluteFile());
+            int result = fileDialog.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                invokeSaveEntityListeners(fileDialog.getSelectedFile());
+            }
+        });
+        JMenuItem loadItem = new JMenuItem("Load");
+        loadItem.addActionListener(e -> {
+            fileDialog.setCurrentDirectory(new File("").getAbsoluteFile());
+            int result = fileDialog.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                invokeLoadEntityListeners(fileDialog.getSelectedFile());
+            }
+        });
+        menu.add(saveItem);
+        menu.add(loadItem);
+        return menu;
+    }
+
+    private void invokeLoadEntityListeners(File file) {
+        for (LoadEntityListener listener : loadEntityListeners) {
+            listener.onEntityLoading(file);
         }
     }
 
-    @Override
-    public void addEntitySerializer(String name, LoadEntityListener loadListener, SaveEntityListener saveListener) {
-        JMenuItem saveItem = new JMenuItem("Save to " + name);
-        saveItem.addActionListener(e -> {
-            JFileChooser saveFileDialog = new JFileChooser();
-            int result = saveFileDialog.showSaveDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                saveListener.onEntitySaving(saveFileDialog.getSelectedFile().getPath());
-            }
-        });
-        entitySerializerMenu.add(saveItem);
-        JMenuItem loadItem = new JMenuItem("Load from " + name);
-        loadItem.addActionListener(e -> {
-            JFileChooser loadFileDialog = new JFileChooser();
-            int result = loadFileDialog.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                loadListener.onEntityLoading(loadFileDialog.getSelectedFile().getPath());
-            }
-        });
-        entitySerializerMenu.addSeparator();
-
+    private void invokeSaveEntityListeners(File file) {
+        for (SaveEntityListener listener : saveEntityListeners) {
+            listener.onEntitySaving(file);
+        }
     }
 
     @Override
@@ -199,6 +210,31 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     @Override
     public void removeEntity(String id) {
         entityPanel.removeEntity(id);
+    }
+
+    @Override
+    public void addFileFilter(FileFilter filter) {
+        fileDialog.addChoosableFileFilter(filter);
+    }
+
+    @Override
+    public void addLoadEntityListener(LoadEntityListener l) {
+        loadEntityListeners.add(l);
+    }
+
+    @Override
+    public void removeLoadEntityListener(LoadEntityListener l) {
+        loadEntityListeners.remove(l);
+    }
+
+    @Override
+    public void addSaveEntityListener(SaveEntityListener l) {
+        saveEntityListeners.add(l);
+    }
+
+    @Override
+    public void removeSaveEntityListener(SaveEntityListener l) {
+        saveEntityListeners.remove(l);
     }
 
     @Override

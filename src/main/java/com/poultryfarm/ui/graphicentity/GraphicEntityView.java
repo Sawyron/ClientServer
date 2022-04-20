@@ -2,19 +2,28 @@ package com.poultryfarm.ui.graphicentity;
 
 import com.poultryfarm.domain.GraphicEntity;
 
+import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 
 public interface GraphicEntityView {
     void addEntity(GraphicEntity entity, String id);
 
-    void addEntitySerializer(String name, LoadEntityListener loadListener, SaveEntityListener saveListener);
-
     void clearEntities();
 
     GraphicEntity getEntityById(String id);
 
     void removeEntity(String id);
+
+    void addFileFilter(FileFilter filter);
+
+    void addLoadEntityListener(LoadEntityListener l);
+
+    void removeLoadEntityListener(LoadEntityListener l);
+
+    void addSaveEntityListener(SaveEntityListener l);
+
+    void removeSaveEntityListener(SaveEntityListener l);
 
     void addStartActionListener(ActionListener l);
 

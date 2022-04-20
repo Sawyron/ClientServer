@@ -16,6 +16,8 @@ public class App {
     public static void main(String[] args) {
         MessageService messageService = new JMessageService();
         try {
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName());
             Image birdImage = new ImageIcon(Objects.requireNonNull(App.class.getResource("/bird.png"))).getImage();
             Image nestlingImage = new ImageIcon(Objects.requireNonNull(App.class.getResource("/nestling.gif"))).getImage();
             ImageGraphicEntityFactory birdFactory = new ImageGraphicEntityFactory(birdImage);
