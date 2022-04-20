@@ -4,6 +4,7 @@ import java.awt.*;
 
 /**
  * Graphic entity that paints an image
+ *
  * @see GraphicEntity
  */
 public class ImageGraphicEntity extends GraphicEntity {
@@ -12,12 +13,11 @@ public class ImageGraphicEntity extends GraphicEntity {
     private final int height;
 
     /**
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param width Image's width
+     * @param x      x coordinate
+     * @param y      y coordinate
+     * @param width  Image's width
      * @param height Image's height
-     * @param image AWT image to be painted
+     * @param image  AWT image to be painted
      */
     public ImageGraphicEntity(int x, int y, int width, int height, Image image) {
         super(x, y);
@@ -27,14 +27,13 @@ public class ImageGraphicEntity extends GraphicEntity {
     }
 
     /**
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param dx x-axis speed
-     * @param dy y-axis speed
-     * @param width Image's width
+     * @param x      x coordinate
+     * @param y      y coordinate
+     * @param dx     x-axis speed
+     * @param dy     y-axis speed
+     * @param width  Image's width
      * @param height Image's height
-     * @param image AWT image to be painted
+     * @param image  AWT image to be painted
      */
     public ImageGraphicEntity(int x, int y, int dx, int dy, int width, int height, Image image) {
         super(x, y, dx, dy);
@@ -42,6 +41,7 @@ public class ImageGraphicEntity extends GraphicEntity {
         this.height = height;
         this.image = image;
     }
+
     @Override
     public void paint(Graphics g) {
         g.drawImage(image, super.getX(), super.getY(), width, height, null);

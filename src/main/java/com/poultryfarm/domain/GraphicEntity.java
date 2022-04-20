@@ -22,9 +22,8 @@ public abstract class GraphicEntity {
     }
 
     /**
-     *
-     * @param x x coordinate
-     * @param y y coordinate
+     * @param x  x coordinate
+     * @param y  y coordinate
      * @param dx x-asis speed
      * @param dy y-asis speed
      */
@@ -45,6 +44,7 @@ public abstract class GraphicEntity {
 
     /**
      * Paints entity on graphics object
+     *
      * @param g AWT graphics object
      */
     abstract public void paint(Graphics g);
@@ -52,6 +52,7 @@ public abstract class GraphicEntity {
     /**
      * Checks whether the provided point
      * is inside the entity
+     *
      * @param x x coordinate of the point
      * @param y y coordinate of the point
      * @return Whether the point is inside the entity
@@ -61,6 +62,7 @@ public abstract class GraphicEntity {
     /**
      * Checks whether the entity is moving
      * out of provided area's by width
+     *
      * @param width Area's width
      * @return Whether the entity is moving
      * out of provided area's by width
@@ -70,6 +72,7 @@ public abstract class GraphicEntity {
     /**
      * Checks whether the entity is moving
      * out of provided area's by height
+     *
      * @param height Area's height
      * @return Whether the entity is moving
      * out of provided area's by height
@@ -78,6 +81,7 @@ public abstract class GraphicEntity {
 
     /**
      * Returns x coordinate of the entity
+     *
      * @return x coordinate
      */
     public int getX() {
@@ -86,6 +90,7 @@ public abstract class GraphicEntity {
 
     /**
      * Sets x coordinate of the entity
+     *
      * @param x x coordinate
      */
     public void setX(int x) {
@@ -94,6 +99,7 @@ public abstract class GraphicEntity {
 
     /**
      * Returns y coordinate of the entity
+     *
      * @return y coordinate
      */
     public int getY() {
@@ -102,6 +108,7 @@ public abstract class GraphicEntity {
 
     /**
      * Sets y coordinate of the entity
+     *
      * @param y y coordinate
      */
     public void setY(int y) {
@@ -110,6 +117,7 @@ public abstract class GraphicEntity {
 
     /**
      * Returns x-asis speed of the entity
+     *
      * @return x-asis speed
      */
     public int getDx() {
@@ -118,6 +126,7 @@ public abstract class GraphicEntity {
 
     /**
      * Sets x-asis speed of the entity
+     *
      * @param dx x-asis speed
      */
     public void setDx(int dx) {
@@ -126,6 +135,7 @@ public abstract class GraphicEntity {
 
     /**
      * Returns y-asis speed of the entity
+     *
      * @return y-asis speed
      */
     public int getDy() {
@@ -134,6 +144,7 @@ public abstract class GraphicEntity {
 
     /**
      * Sets y-asis speed of the entity
+     *
      * @param dy y-asis speed
      */
     public void setDy(int dy) {

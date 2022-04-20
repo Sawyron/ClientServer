@@ -1,7 +1,6 @@
 package com.poultryfarm.ui.habitat;
 
 import com.poultryfarm.domain.GraphicEntity;
-import com.poultryfarm.ui.UIException;
 import com.poultryfarm.ui.graphicentity.*;
 
 import javax.swing.*;

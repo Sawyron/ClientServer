@@ -4,13 +4,15 @@ import com.poultryfarm.domain.AliveEntity;
 import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.HabitatModel;
 import com.poultryfarm.services.EntitySpawn;
-import com.poultryfarm.services.GraphicEntityFactory;
 import com.poultryfarm.services.RunnableWorker;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
