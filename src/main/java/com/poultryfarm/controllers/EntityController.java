@@ -8,7 +8,7 @@ import com.poultryfarm.services.EntitySpawn;
 import com.poultryfarm.services.MessageService;
 import com.poultryfarm.services.RunnableWorker;
 import com.poultryfarm.services.entityserializers.EntitySerializer;
-import com.poultryfarm.services.entityserializers.FIleEntitySerializer;
+import com.poultryfarm.services.entityserializers.ExtensionFileEntitySerializer;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 import com.poultryfarm.ui.habitat.FileTypeFilter;
 
@@ -32,7 +32,7 @@ public class EntityController {
     private long movementPeriodInMs = 50;
     private long checkDeadPeriod = 500;
     private long pauseTime;
-    private List<FIleEntitySerializer> fIleEntitySerializers = new LinkedList<>();
+    private final List<ExtensionFileEntitySerializer> fIleEntitySerializers = new LinkedList<>();
 
     public EntityController(HabitatModel model, GraphicEntityView view, MessageService messageService) {
         this.model = model;
@@ -182,7 +182,7 @@ public class EntityController {
     }
 
     private void saveEntities(File file) {
-        FIleEntitySerializer serializer = fIleEntitySerializers.stream()
+        ExtensionFileEntitySerializer serializer = fIleEntitySerializers.stream()
                 .filter(s -> file.getName().endsWith(s.getExtension()))
                 .findFirst()
                 .orElse(null);
@@ -212,7 +212,7 @@ public class EntityController {
     }
 
     private void loadEntities(File file) {
-        FIleEntitySerializer serializer = fIleEntitySerializers.stream()
+        ExtensionFileEntitySerializer serializer = fIleEntitySerializers.stream()
                 .filter(s -> file.getName().endsWith(s.getExtension()))
                 .findFirst()
                 .orElse(null);
@@ -236,7 +236,7 @@ public class EntityController {
 
     public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
         view.addFileFilter(new FileTypeFilter(description, extension));
-        fIleEntitySerializers.add(new FIleEntitySerializer(serializer, description, extension));
+        fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
     }
 
     public void run() {

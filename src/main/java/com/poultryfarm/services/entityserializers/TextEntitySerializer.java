@@ -9,30 +9,34 @@ import java.util.List;
 
 public class TextEntitySerializer implements EntitySerializer {
     @Override
-    public void saveEntities(Collection<TransferEntity> entities, File file) {
-        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
-            fileWriter.write(Integer.toString(entities.size()));
-            fileWriter.newLine();
+    public void saveEntities(Collection<TransferEntity> entities, OutputStream out) {
+        Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+        try {
+            writer.write(Integer.toString(entities.size()));
+            writer.write('\n');
             for (TransferEntity entity : entities) {
-                entity.writeToWriter(fileWriter);
+                entity.writeToWriter(writer);
             }
+            writer.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<TransferEntity> loadEntities(File file) {
+    public List<TransferEntity> loadEntities(InputStream in) {
         List<TransferEntity> entities = new LinkedList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            int size = Integer.parseInt(reader.readLine());
-            for (int i = 0; i < size; i++) {
-                TransferEntity entity = new TransferEntity();
-                entity.readFromReader(reader);
-                entities.add(entity);
-            }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        int size = 0;
+        try {
+            size = Integer.parseInt(reader.readLine());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        for (int i = 0; i < size; i++) {
+            TransferEntity entity = new TransferEntity();
+            entity.readFromReader(reader);
+            entities.add(entity);
         }
         return entities;
     }
