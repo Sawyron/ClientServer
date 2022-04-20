@@ -5,9 +5,20 @@ import com.poultryfarm.domain.GraphicEntity;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
+import java.util.Collection;
 
 public interface GraphicEntityView {
+    void setActiveState();
+
+    void setStoppedState();
+
+    void setPausedState();
+
+    void setResumedState();
+
     void addEntity(GraphicEntity entity, String id);
+
+    Collection<GraphicEntity> getEntities();
 
     void clearEntities();
 

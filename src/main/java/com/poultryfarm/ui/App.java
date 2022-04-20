@@ -6,6 +6,8 @@ import com.poultryfarm.services.FabricEntitySpawn;
 import com.poultryfarm.services.ImageGraphicEntityFactory;
 import com.poultryfarm.services.JMessageService;
 import com.poultryfarm.services.MessageService;
+import com.poultryfarm.services.entityserializers.BinarySerializer;
+import com.poultryfarm.services.entityserializers.TextEntitySerializer;
 import com.poultryfarm.ui.habitat.HabitatFrame;
 
 import javax.swing.*;
@@ -25,9 +27,11 @@ public class App {
             ImageGraphicEntityFactory nestlingFactory = new ImageGraphicEntityFactory(nestlingImage);
             HabitatFrame frame = new HabitatFrame(500, 400);
             HabitatModel model = new HabitatModel();
-            EntityController controller = new EntityController(model, frame);
+            EntityController controller = new EntityController(model, frame, messageService);
             controller.addEntitySpawn(new FabricEntitySpawn("Bird", 10_000, 5_000, birdFactory));
             controller.addEntitySpawn(new FabricEntitySpawn("Nestling", 10_000, 5_000, nestlingFactory));
+            controller.addFileEntitySerializer("Binary", ".bn", new BinarySerializer());
+            controller.addFileEntitySerializer("Text", ".txt", new TextEntitySerializer());
             controller.run();
         } catch (Exception e) {
             e.printStackTrace();

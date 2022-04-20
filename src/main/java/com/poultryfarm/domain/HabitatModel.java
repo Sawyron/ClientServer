@@ -23,6 +23,17 @@ public class HabitatModel {
         addEntity(entity, System.currentTimeMillis());
     }
 
+    public AliveEntity getEntityById(String id) {
+        return entityBirthTime.keySet().stream()
+                .filter(entity -> entity.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Collection<AliveEntity> getEntities() {
+        return List.copyOf(entityBirthTime.keySet());
+    }
+
     public boolean removeEntity(String id) {
         return entityBirthTime.entrySet().removeIf(e -> e.getKey().getId().equals(id));
     }

@@ -9,10 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EntityPanel extends JPanel {
     private final Map<String, GraphicEntity> entityIdMap = new HashMap<>();
@@ -75,6 +73,10 @@ public class EntityPanel extends JPanel {
                 entity.setDy(-entity.getDy());
         }
         repaint();
+    }
+
+    public synchronized Collection<GraphicEntity> getEntities() {
+        return List.copyOf(entityIdMap.values());
     }
 
     private synchronized void invokeEntityRightListeners(String id) {

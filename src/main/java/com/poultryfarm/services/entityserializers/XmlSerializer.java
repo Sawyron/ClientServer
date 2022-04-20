@@ -1,16 +1,17 @@
-package com.poultryfarm.services;
+package com.poultryfarm.services.entityserializers;
 
-import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.ImageGraphicEntity;
+import com.poultryfarm.domain.TransferEntity;
 import com.thoughtworks.xstream.XStream;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-public class XmlSerializer implements GraphicEntitySerializer {
+public class XmlSerializer implements EntitySerializer {
     private XStream xStream = new XStream();
 
     public XmlSerializer() {
@@ -23,9 +24,9 @@ public class XmlSerializer implements GraphicEntitySerializer {
     }
 
     @Override
-    public void saveEntities(Collection<GraphicEntity> entities, String path) {
+    public void saveEntities(Collection<TransferEntity> entities, File file) {
         String xml = xStream.toXML(entities);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(xml);
         } catch (IOException e) {
             e.printStackTrace();
@@ -33,7 +34,7 @@ public class XmlSerializer implements GraphicEntitySerializer {
     }
 
     @Override
-    public List<GraphicEntity> loadEntities(String path) {
-        return (List<GraphicEntity>) xStream.fromXML(path);
+    public List<TransferEntity> loadEntities(File file) {
+        return (List<TransferEntity>) xStream.fromXML(file);
     }
 }

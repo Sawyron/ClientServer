@@ -65,18 +65,23 @@ public class TransferEntity implements Serializable {
     }
 
     public void readFromReader(Reader reader) {
-        BufferedReader bufferedReader = new BufferedReader(reader);
         try {
-            String line = bufferedReader.readLine();
-            if (line != null) {
-                String[] args = line.split(" ");
-                if (args.length >= 5) {
-                    x = Integer.parseInt(args[0]);
-                    y = Integer.parseInt(args[1]);
-                    dx = Integer.parseInt(args[2]);
-                    dy = Integer.parseInt(args[3]);
-                    type = args[4].replaceAll("\n", "");
+            StringBuilder stringBuilder = new StringBuilder();
+            int charCode;
+            while ((charCode = reader.read()) != -1) {
+                char c = (char) charCode;
+                if (c == '\n') {
+                    break;
                 }
+                stringBuilder.append(c);
+            }
+            String[] args = stringBuilder.toString().split(" ");
+            if (args.length >= 5) {
+                x = Integer.parseInt(args[0]);
+                y = Integer.parseInt(args[1]);
+                dx = Integer.parseInt(args[2]);
+                dy = Integer.parseInt(args[3]);
+                type = args[4].replaceAll("\n", "");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

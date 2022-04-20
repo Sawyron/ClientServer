@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,31 +45,12 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         bottomPanel.add(resumeButton);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        startButton.addActionListener((e) -> {
-            startButton.setEnabled(false);
-            stopButton.setEnabled(true);
-            pauseButton.setEnabled(true);
-            resumeButton.setEnabled(false);
-        });
-        stopButton.addActionListener((e) -> {
-            startButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            pauseButton.setEnabled(false);
-            resumeButton.setEnabled(false);
-        });
-        resumeButton.addActionListener((e) -> {
-            resumeButton.setEnabled(false);
-            pauseButton.setEnabled(true);
-        });
-        pauseButton.addActionListener((e) -> {
-            pauseButton.setEnabled(false);
-            resumeButton.setEnabled(true);
-        });
-
         setTitle("Poultry farm");
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(createMenu());
         setJMenuBar(menuBar);
+
+        setStoppedState();
     }
 
     private JMenu createMenu() {
@@ -192,8 +174,41 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     }
 
     @Override
+    public void setActiveState() {
+        startButton.setEnabled(false);
+        stopButton.setEnabled(true);
+        pauseButton.setEnabled(true);
+        resumeButton.setEnabled(false);
+    }
+
+    @Override
+    public void setStoppedState() {
+        startButton.setEnabled(true);
+        stopButton.setEnabled(false);
+        pauseButton.setEnabled(false);
+        resumeButton.setEnabled(false);
+    }
+
+    @Override
+    public void setPausedState() {
+        pauseButton.setEnabled(false);
+        resumeButton.setEnabled(true);
+    }
+
+    @Override
+    public void setResumedState() {
+        resumeButton.setEnabled(false);
+        pauseButton.setEnabled(true);
+    }
+
+    @Override
     public void addEntity(GraphicEntity entity, String id) {
         entityPanel.addEntity(entity, id);
+    }
+
+    @Override
+    public Collection<GraphicEntity> getEntities() {
+        return entityPanel.getEntities();
     }
 
     @Override
