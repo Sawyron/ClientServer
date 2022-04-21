@@ -39,7 +39,6 @@ public class EntityController {
         this.model = model;
         this.view = view;
         this.messageService = messageService;
-
         view.addStartActionListener((e) -> {
             view.setActiveState();
             resume();
@@ -69,6 +68,48 @@ public class EntityController {
                 System.exit(0);
             }
         });
+
+    }
+
+    public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
+        view.addFileFilter(new FileNameExtensionFilter(description, extension));
+        fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
+    }
+
+    public void run() {
+        setupWorkers();
+        view.run();
+        for (RunnableWorker worker : workers) {
+            worker.pause();
+            executorService.submit(worker);
+        }
+    }
+
+    public long getViewUpdatePeriodInMs() {
+        return viewUpdatePeriodInMs;
+    }
+
+    public void setViewUpdatePeriodInMs(long viewUpdatePeriodInMs) {
+        this.viewUpdatePeriodInMs = viewUpdatePeriodInMs;
+    }
+
+    public long getMovementPeriodInMs() {
+        return movementPeriodInMs;
+    }
+
+    public void setMovementPeriodInMs(long movementPeriodInMs) {
+        this.movementPeriodInMs = movementPeriodInMs;
+    }
+
+    public long getCheckDeadPeriod() {
+        return checkDeadPeriod;
+    }
+
+    public void setCheckDeadPeriod(long checkDeadPeriod) {
+        this.checkDeadPeriod = checkDeadPeriod;
+    }
+
+    private void setupWorkers() {
         workers.add(new RunnableWorker() {
             @Override
             protected void doUnitOfWork() {
@@ -95,6 +136,21 @@ public class EntityController {
                 removeDeadEntities();
             }
         });
+        for (EntitySpawn entitySpawn : entitySpawns) {
+            workers.add(new RunnableWorker() {
+                @Override
+                protected void doUnitOfWork() {
+                    Random random = new Random();
+                    spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entitySpawn);
+                    try {
+                        Thread.sleep(entitySpawn.getSpawnPeriodInMs());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        throw new ControllerException(e.getMessage(), e);
+                    }
+                }
+            });
+        }
     }
 
     private void changeEntityMovingState(String id) {
@@ -235,55 +291,4 @@ public class EntityController {
         }
     }
 
-    public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
-        view.addFileFilter(new FileNameExtensionFilter(description, extension));
-        fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
-    }
-
-    public void run() {
-        for (EntitySpawn entitySpawn : entitySpawns) {
-            workers.add(new RunnableWorker() {
-                @Override
-                protected void doUnitOfWork() {
-                    Random random = new Random();
-                    spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entitySpawn);
-                    try {
-                        Thread.sleep(entitySpawn.getSpawnPeriodInMs());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        throw new ControllerException(e.getMessage(), e);
-                    }
-                }
-            });
-        }
-        view.run();
-        for (RunnableWorker worker : workers) {
-            worker.pause();
-            executorService.submit(worker);
-        }
-    }
-
-    public long getViewUpdatePeriodInMs() {
-        return viewUpdatePeriodInMs;
-    }
-
-    public void setViewUpdatePeriodInMs(long viewUpdatePeriodInMs) {
-        this.viewUpdatePeriodInMs = viewUpdatePeriodInMs;
-    }
-
-    public long getMovementPeriodInMs() {
-        return movementPeriodInMs;
-    }
-
-    public void setMovementPeriodInMs(long movementPeriodInMs) {
-        this.movementPeriodInMs = movementPeriodInMs;
-    }
-
-    public long getCheckDeadPeriod() {
-        return checkDeadPeriod;
-    }
-
-    public void setCheckDeadPeriod(long checkDeadPeriod) {
-        this.checkDeadPeriod = checkDeadPeriod;
-    }
 }
