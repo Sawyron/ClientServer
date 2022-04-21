@@ -57,7 +57,6 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         JMenu menu = new JMenu("File");
         JMenuItem saveItem = new JMenuItem("Save");
         saveItem.addActionListener(e -> {
-            fileDialog.setCurrentDirectory(new File("").getAbsoluteFile());
             int result = fileDialog.showSaveDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 invokeSaveEntityListeners(fileDialog.getSelectedFile());
@@ -65,7 +64,6 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         });
         JMenuItem loadItem = new JMenuItem("Load");
         loadItem.addActionListener(e -> {
-            fileDialog.setCurrentDirectory(new File("").getAbsoluteFile());
             int result = fileDialog.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 invokeLoadEntityListeners(fileDialog.getSelectedFile());

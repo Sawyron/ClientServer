@@ -10,14 +10,15 @@ import com.poultryfarm.services.RunnableWorker;
 import com.poultryfarm.services.entityserializers.EntitySerializer;
 import com.poultryfarm.services.entityserializers.ExtensionFileEntitySerializer;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
-import com.poultryfarm.ui.habitat.FileTypeFilter;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class EntityController {
     private final HabitatModel model;
@@ -206,7 +207,7 @@ public class EntityController {
                                 graphicEntity.getDy(),
                                 aliveEntity.getType()
                         );
-                    }).toList();
+                    }).collect(Collectors.toCollection(LinkedList::new));
         }
         serializer.saveEntities(transferEntities, file);
     }
@@ -235,7 +236,7 @@ public class EntityController {
     }
 
     public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
-        view.addFileFilter(new FileTypeFilter(description, extension));
+        view.addFileFilter(new FileNameExtensionFilter(description, extension));
         fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
     }
 

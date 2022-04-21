@@ -7,7 +7,9 @@ import com.poultryfarm.services.ImageGraphicEntityFactory;
 import com.poultryfarm.services.JMessageService;
 import com.poultryfarm.services.MessageService;
 import com.poultryfarm.services.entityserializers.BinarySerializer;
+import com.poultryfarm.services.entityserializers.ObjectSerializer;
 import com.poultryfarm.services.entityserializers.TextEntitySerializer;
+import com.poultryfarm.services.entityserializers.XmlSerializer;
 import com.poultryfarm.ui.habitat.HabitatFrame;
 
 import javax.swing.*;
@@ -30,8 +32,10 @@ public class App {
             EntityController controller = new EntityController(model, frame, messageService);
             controller.addEntitySpawn(new FabricEntitySpawn("Bird", 10_000, 5_000, birdFactory));
             controller.addEntitySpawn(new FabricEntitySpawn("Nestling", 10_000, 5_000, nestlingFactory));
-            controller.addFileEntitySerializer("Binary", ".bn", new BinarySerializer());
-            controller.addFileEntitySerializer("Text", ".txt", new TextEntitySerializer());
+            controller.addFileEntitySerializer("Binary file (*.bn)", "bn", new BinarySerializer());
+            controller.addFileEntitySerializer("Text file (*.txt)", "txt", new TextEntitySerializer());
+            controller.addFileEntitySerializer("XML file (*.xml)", "xml", new XmlSerializer());
+            controller.addFileEntitySerializer("Object file (*.obj)", "obj", new ObjectSerializer());
             controller.run();
         } catch (Exception e) {
             e.printStackTrace();

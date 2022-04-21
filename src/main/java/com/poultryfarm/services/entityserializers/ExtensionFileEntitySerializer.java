@@ -33,8 +33,6 @@ public class ExtensionFileEntitySerializer implements FileEntitySerializer {
     public void saveEntities(Collection<TransferEntity> entities, File file) {
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             serializer.saveEntities(entities, fileOutputStream);
-            serializer.saveEntities(entities, System.out);
-            fileOutputStream.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
