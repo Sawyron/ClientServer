@@ -9,9 +9,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.*;
 
 public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final EntityPanel entityPanel = new EntityPanel();
@@ -22,6 +21,8 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final JFileChooser fileDialog = new JFileChooser();
     private final List<LoadEntityListener> loadEntityListeners = new LinkedList<>();
     private final List<SaveEntityListener> saveEntityListeners = new LinkedList<>();
+
+    private final Map<FileFilter, String> filterExtensions = new HashMap<>();
 
 
     public HabitatFrame(int width, int height) {
@@ -59,7 +60,15 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         saveItem.addActionListener(e -> {
             int result = fileDialog.showSaveDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                invokeSaveEntityListeners(fileDialog.getSelectedFile());
+                FileFilter filter = fileDialog.getFileFilter();
+                String extension = filterExtensions.get(filter);
+                File file = fileDialog.getSelectedFile();
+                if (extension != null) {
+                    if (!file.getName().endsWith("." + extension)) {
+                        file = new File(file.getAbsolutePath() + "." + extension);
+                    }
+                }
+                invokeSaveEntityListeners(file);
             }
         });
         JMenuItem loadItem = new JMenuItem("Load");
@@ -225,11 +234,6 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     }
 
     @Override
-    public void addFileFilter(FileFilter filter) {
-        fileDialog.addChoosableFileFilter(filter);
-    }
-
-    @Override
     public void addLoadEntityListener(LoadEntityListener l) {
         loadEntityListeners.add(l);
     }
@@ -252,5 +256,11 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     @Override
     public void moveEntities() {
         entityPanel.moveEntities();
+    }
+
+    @Override
+    public void addFileFilter(FileFilter filter, String extension) {
+        fileDialog.addChoosableFileFilter(filter);
+        filterExtensions.put(filter, extension);
     }
 }

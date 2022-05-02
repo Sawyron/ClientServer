@@ -11,6 +11,7 @@
     <modules>
         <module>Desktop</module>
         <module>Transfer</module>
+        <module>Server</module>
     </modules>
 
     <properties>

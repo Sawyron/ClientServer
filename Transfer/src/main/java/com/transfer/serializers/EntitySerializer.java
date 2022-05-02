@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface EntitySerializer {
     void saveEntities(Collection<TransferEntity> entities, OutputStream out);
+
     List<TransferEntity> loadEntities(InputStream in);
 }

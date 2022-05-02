@@ -72,7 +72,7 @@ public class EntityController {
     }
 
     public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
-        view.addFileFilter(new FileNameExtensionFilter(description, extension));
+        view.addFileFilter(new FileNameExtensionFilter(description, extension), extension);
         fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
     }
 

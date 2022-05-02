@@ -26,7 +26,7 @@ public interface GraphicEntityView {
 
     void removeEntity(String id);
 
-    void addFileFilter(FileFilter filter);
+    void addFileFilter(FileFilter filter, String extension);
 
     void addLoadEntityListener(LoadEntityListener l);
 
