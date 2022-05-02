@@ -3,13 +3,13 @@ package com.poultryfarm.controllers;
 import com.poultryfarm.domain.AliveEntity;
 import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.HabitatModel;
-import com.poultryfarm.domain.TransferEntity;
 import com.poultryfarm.services.EntitySpawn;
 import com.poultryfarm.services.MessageService;
 import com.poultryfarm.services.RunnableWorker;
-import com.poultryfarm.services.entityserializers.EntitySerializer;
-import com.poultryfarm.services.entityserializers.ExtensionFileEntitySerializer;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
+import com.transfer.domain.TransferEntity;
+import com.transfer.serializers.EntitySerializer;
+import com.transfer.serializers.ExtensionFileEntitySerializer;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.WindowAdapter;

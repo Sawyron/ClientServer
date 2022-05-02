@@ -6,11 +6,11 @@ import com.poultryfarm.services.FabricEntitySpawn;
 import com.poultryfarm.services.ImageGraphicEntityFactory;
 import com.poultryfarm.services.JMessageService;
 import com.poultryfarm.services.MessageService;
-import com.poultryfarm.services.entityserializers.BinarySerializer;
-import com.poultryfarm.services.entityserializers.ObjectSerializer;
-import com.poultryfarm.services.entityserializers.TextEntitySerializer;
-import com.poultryfarm.services.entityserializers.XmlSerializer;
 import com.poultryfarm.ui.habitat.HabitatFrame;
+import com.transfer.serializers.BinarySerializer;
+import com.transfer.serializers.ObjectSerializer;
+import com.transfer.serializers.TextEntitySerializer;
+import com.transfer.serializers.XmlSerializer;
 
 import javax.swing.*;
 import java.awt.*;

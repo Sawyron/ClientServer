@@ -1,6 +1,7 @@
-package com.poultryfarm.services.entityserializers;
+package com.transfer.serializers;
 
-import com.poultryfarm.domain.TransferEntity;
+
+import com.transfer.domain.TransferEntity;
 
 import java.io.*;
 import java.util.Collection;
@@ -27,7 +28,7 @@ public class TextEntitySerializer implements EntitySerializer {
     public List<TransferEntity> loadEntities(InputStream in) {
         List<TransferEntity> entities = new LinkedList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        int size = 0;
+        int size;
         try {
             size = Integer.parseInt(reader.readLine());
         } catch (IOException e) {

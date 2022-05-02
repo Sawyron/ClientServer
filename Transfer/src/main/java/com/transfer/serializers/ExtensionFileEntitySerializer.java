@@ -1,6 +1,6 @@
-package com.poultryfarm.services.entityserializers;
+package com.transfer.serializers;
 
-import com.poultryfarm.domain.TransferEntity;
+import com.transfer.domain.TransferEntity;
 
 import java.io.File;
 import java.io.FileInputStream;

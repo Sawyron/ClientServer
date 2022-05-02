@@ -1,4 +1,4 @@
-package com.poultryfarm.domain;
+package com.transfer.domain;
 
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +7,6 @@ import java.io.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TransferEntityTest {
-
     @Test
     void writeToOutputStream() {
         var entity = new TransferEntity(10, 20, 30, 40, "Cat");

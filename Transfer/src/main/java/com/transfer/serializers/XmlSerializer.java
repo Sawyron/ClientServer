@@ -1,10 +1,10 @@
-package com.poultryfarm.services.entityserializers;
+package com.transfer.serializers;
 
-import com.poultryfarm.domain.TransferEntity;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
+import com.transfer.domain.TransferEntity;
 
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -1,4 +1,4 @@
-package com.poultryfarm.domain;
+package com.transfer.domain;
 
 import java.io.*;
 

@@ -1,6 +1,6 @@
-package com.poultryfarm.services.entityserializers;
+package com.transfer.serializers;
 
-import com.poultryfarm.domain.TransferEntity;
+import com.transfer.domain.TransferEntity;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,6 +9,5 @@ import java.util.List;
 
 public interface EntitySerializer {
     void saveEntities(Collection<TransferEntity> entities, OutputStream out);
-
     List<TransferEntity> loadEntities(InputStream in);
 }

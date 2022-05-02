@@ -1,6 +1,6 @@
-package com.poultryfarm.services.entityserializers;
+package com.transfer.serializers;
 
-import com.poultryfarm.domain.TransferEntity;
+import com.transfer.domain.TransferEntity;
 
 import java.io.*;
 import java.util.Collection;
@@ -25,7 +25,7 @@ public class BinarySerializer implements EntitySerializer {
     public List<TransferEntity> loadEntities(InputStream in) {
         List<TransferEntity> entities = new LinkedList<>();
         DataInputStream dataInputStream = new DataInputStream(in);
-        int size = 0;
+        int size;
         try {
             size = dataInputStream.readInt();
         } catch (IOException e) {
