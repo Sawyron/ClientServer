@@ -127,4 +127,28 @@ public class TransferEntity implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TransferEntity that = (TransferEntity) o;
+
+        if (x != that.x) return false;
+        if (y != that.y) return false;
+        if (dx != that.dx) return false;
+        if (dy != that.dy) return false;
+        return type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = x;
+        result = 31 * result + y;
+        result = 31 * result + dx;
+        result = 31 * result + dy;
+        result = 31 * result + type.hashCode();
+        return result;
+    }
 }

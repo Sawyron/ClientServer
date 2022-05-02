@@ -29,7 +29,8 @@ public class XmlSerializer implements EntitySerializer {
 
     @Override
     public void saveEntities(Collection<TransferEntity> entities, OutputStream out) {
-        xStream.toXML(entities, out);
+        LinkedList<TransferEntity> buff = new LinkedList<>(entities);
+        xStream.toXML(buff, out);
     }
 
     @Override
