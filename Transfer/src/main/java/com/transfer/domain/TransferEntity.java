@@ -151,4 +151,15 @@ public class TransferEntity implements Serializable {
         result = 31 * result + type.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "TransferEntity{" +
+                "x=" + x +
+                ", y=" + y +
+                ", dx=" + dx +
+                ", dy=" + dy +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }
