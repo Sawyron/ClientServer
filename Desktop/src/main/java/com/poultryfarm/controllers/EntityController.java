@@ -66,26 +66,38 @@ public class EntityController {
         view.addLoadEntityListener(this::loadEntities);
         view.addSaveEntityListener(this::saveEntities);
         view.addSendEntitiesActionListener((e) -> {
-            List<TransferEntity> transferEntities = getAllTransferEntities();
-            entityClient.sendEntities(transferEntities);
+            executorService.submit(() -> {
+                List<TransferEntity> transferEntities = getAllTransferEntities();
+                entityClient.sendEntities(transferEntities);
+            });
         });
         view.addReceiveEntitiesActionListener((e) -> {
-            List<TransferEntity> transferEntities = entityClient.receiveEntities();
-            addTransferEntities(transferEntities);
+            executorService.submit(() -> {
+                List<TransferEntity> transferEntities = entityClient.receiveEntities();
+                addTransferEntities(transferEntities);
+            });
         });
         view.addGetEntityIndexListener((index) -> {
-            TransferEntity transferEntity = entityClient.getEntityAt(index);
-            if (transferEntity.getType().equalsIgnoreCase("null")) {
-                return;
-            }
-            addTransferEntities(List.of(transferEntity));
+            executorService.submit(() -> {
+                TransferEntity transferEntity = entityClient.getEntityAt(index);
+                if (transferEntity.getType().equalsIgnoreCase("null")) {
+                    return;
+                }
+                addTransferEntities(List.of(transferEntity));
+            });
         });
         view.addServerNameListener((value) -> {
-            Client client = clientMap.get(value);
-            if (client == null) {
-                return;
-            }
-            entityClient.setClient(client);
+            executorService.submit(() -> {
+                synchronized (clientMap) {
+                    Client client = clientMap.get(value);
+                    if (client == null) {
+                        return;
+                    }
+                    synchronized (client) {
+                        entityClient.setClient(client);
+                    }
+                }
+            });
         });
         view.addRemovingEntityIndexListener((entityClient::removeAt));
         view.addCountButtonActionListener((e) -> {
