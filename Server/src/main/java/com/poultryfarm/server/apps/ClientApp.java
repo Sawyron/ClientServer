@@ -1,5 +1,7 @@
 package com.poultryfarm.server.apps;
 
+import com.poultryfarm.server.clients.Client;
+import com.poultryfarm.server.clients.TcpClient;
 import com.transfer.domain.TransferEntity;
 import com.transfer.serializers.EntitySerializer;
 import com.transfer.serializers.TextEntitySerializer;
@@ -8,17 +10,28 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.*;
 import java.util.Arrays;
 import java.util.List;
 
 public class ClientApp {
     public static void main(String[] args) {
-        //startTcpClient();
-        startUdpClient();
+        List<TransferEntity> entities = Arrays.asList(
+                new TransferEntity(10, 20, 30, 40, "Cat"),
+                new TransferEntity(15, 25, 35, 45, "Dog"),
+                new TransferEntity(20, 30, 40, 50, "Bird")
+        );
+        EntitySerializer serializer = new TextEntitySerializer();
+        try {
+            Client client = new TcpClient(8080, InetAddress.getLocalHost());
+            String message = "POST/birds\n";
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            serializer.saveEntities(entities, byteArrayOutputStream);
+            message += byteArrayOutputStream.toString();
+            client.sendData(message);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void startTcpClient() {
