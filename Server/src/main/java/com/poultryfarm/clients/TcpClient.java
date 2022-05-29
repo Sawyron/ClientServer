@@ -1,4 +1,4 @@
-package com.poultryfarm.server.clients;
+package com.poultryfarm.clients;
 
 import com.poultryfarm.server.ServerException;
 

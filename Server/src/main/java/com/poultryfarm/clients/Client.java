@@ -1,4 +1,4 @@
-package com.poultryfarm.server.clients;
+package com.poultryfarm.clients;
 
 public interface Client {
     void sendData(String data);

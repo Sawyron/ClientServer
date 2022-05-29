@@ -1,11 +1,13 @@
 package com.poultryfarm.controllers;
 
+import com.poultryfarm.clients.Client;
 import com.poultryfarm.domain.AliveEntity;
 import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.HabitatModel;
 import com.poultryfarm.services.EntitySpawn;
 import com.poultryfarm.services.MessageService;
 import com.poultryfarm.services.RunnableWorker;
+import com.poultryfarm.services.network.EntityClient;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 import com.transfer.domain.TransferEntity;
 import com.transfer.serializers.EntitySerializer;
@@ -24,6 +26,8 @@ public class EntityController {
     private final HabitatModel model;
     private final GraphicEntityView view;
     private final MessageService messageService;
+    private final EntityClient entityClient;
+    private final Map<String, Client> clientMap = new HashMap<>();
     private final List<EntitySpawn> entitySpawns = new LinkedList<>();
 
     private final List<RunnableWorker> workers = new LinkedList<>();
@@ -35,9 +39,10 @@ public class EntityController {
     private long pauseTime;
     private final List<ExtensionFileEntitySerializer> fIleEntitySerializers = new LinkedList<>();
 
-    public EntityController(HabitatModel model, GraphicEntityView view, MessageService messageService) {
+    public EntityController(HabitatModel model, GraphicEntityView view, MessageService messageService, EntityClient entityClient) {
         this.model = model;
         this.view = view;
+        this.entityClient = entityClient;
         this.messageService = messageService;
         view.addStartActionListener((e) -> {
             view.setActiveState();
@@ -60,6 +65,32 @@ public class EntityController {
         view.addEntityLeftButtonClickedListener(this::changeEntityMovingState);
         view.addLoadEntityListener(this::loadEntities);
         view.addSaveEntityListener(this::saveEntities);
+        view.addSendEntitiesActionListener((e) -> {
+            List<TransferEntity> transferEntities = getAllTransferEntities();
+            entityClient.sendEntities(transferEntities);
+        });
+        view.addReceiveEntitiesActionListener((e) -> {
+            List<TransferEntity> transferEntities = entityClient.receiveEntities();
+            addTransferEntities(transferEntities);
+        });
+        view.addGetEntityIndexListener((index) -> {
+            TransferEntity transferEntity = entityClient.getEntityAt(index);
+            if (transferEntity.getType().equalsIgnoreCase("null")) {
+                return;
+            }
+            addTransferEntities(List.of(transferEntity));
+        });
+        view.addServerNameListener((value) -> {
+            Client client = clientMap.get(value);
+            if (client == null) {
+                return;
+            }
+            entityClient.setClient(client);
+        });
+        view.addRemovingEntityIndexListener((entityClient::removeAt));
+        view.addCountButtonActionListener((e) -> {
+            messageService.showMessage("Entities at server: " + entityClient.getEntitiesCount());
+        });
         view.addWindowAction(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -76,8 +107,15 @@ public class EntityController {
         fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
     }
 
+    public void addServerClient(Client client, String name) {
+        clientMap.put(name, client);
+    }
+
     public void run() {
         setupWorkers();
+        for (String server : clientMap.keySet()) {
+            view.addServerName(server);
+        }
         view.run();
         for (RunnableWorker worker : workers) {
             worker.pause();
@@ -247,6 +285,11 @@ public class EntityController {
             messageService.showMessage("No serializer for this extension");
             return;
         }
+        List<TransferEntity> transferEntities = getAllTransferEntities();
+        serializer.saveEntities(transferEntities, file);
+    }
+
+    private List<TransferEntity> getAllTransferEntities() {
         Collection<AliveEntity> aliveEntities;
         synchronized (model) {
             aliveEntities = model.getEntities();
@@ -265,7 +308,7 @@ public class EntityController {
                         );
                     }).collect(Collectors.toCollection(LinkedList::new));
         }
-        serializer.saveEntities(transferEntities, file);
+        return transferEntities;
     }
 
     private void loadEntities(File file) {
@@ -278,6 +321,10 @@ public class EntityController {
             return;
         }
         List<TransferEntity> transferEntities = serializer.loadEntities(file);
+        addTransferEntities(transferEntities);
+    }
+
+    private void addTransferEntities(Collection<TransferEntity> transferEntities) {
         for (TransferEntity transferEntity : transferEntities) {
             entitySpawns.stream()
                     .filter(s -> s.getType().equals(transferEntity.getType()))

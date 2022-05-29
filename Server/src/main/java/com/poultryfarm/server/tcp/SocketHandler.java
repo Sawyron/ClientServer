@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class SocketHandler implements Runnable {
     private final Socket client;
@@ -30,18 +31,26 @@ public class SocketHandler implements Runnable {
     public void run() {
         try {
             String request = bufferedReader.readLine();
-            String[] requestArgs = request.split("/");
+            String[] requestArgs = request.split("\\?")[0].split("/");
             String method = requestArgs[0];
             String handlerName = requestArgs[1];
-            String line;
-            StringBuilder dataBuilder = new StringBuilder();
-            while ((line = bufferedReader.readLine()) != null) {
-                dataBuilder.append(line).append("\n");
-            }
             if (method.equalsIgnoreCase("GET")) {
-                handleGetRequest(handlerName);
+                Properties properties = new Properties();
+                if (request.contains("?")) {
+                    String getParameters = request.split("\\?")[1];
+                    for (String pair : getParameters.split("&")) {
+                        String[] keyValue = pair.split("=");
+                        properties.setProperty(keyValue[0], keyValue[1]);
+                    }
+                }
+                handleGetRequest(handlerName, properties);
             }
             if (method.equalsIgnoreCase("POST")) {
+                String line;
+                StringBuilder dataBuilder = new StringBuilder();
+                while ((line = bufferedReader.readLine()) != null) {
+                    dataBuilder.append(line).append("\n");
+                }
                 handlePostRequest(handlerName, dataBuilder.toString());
             }
             client.close();
@@ -58,12 +67,12 @@ public class SocketHandler implements Runnable {
         postHandlers.put(name, handler);
     }
 
-    private void handleGetRequest(String handlerName) throws IOException {
+    private void handleGetRequest(String handlerName, Properties parameters) throws IOException {
         GetHandler handler = getHandlers.get(handlerName);
         if (handler == null) {
             return;
         }
-        bufferedWriter.write(handler.handle());
+        bufferedWriter.write(handler.handle(parameters));
         bufferedWriter.flush();
     }
 

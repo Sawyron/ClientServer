@@ -1,7 +1,7 @@
-package com.poultryfarm.server.apps;
+package com.poultryfarm.apps;
 
-import com.poultryfarm.server.clients.Client;
-import com.poultryfarm.server.clients.TcpClient;
+import com.poultryfarm.clients.Client;
+import com.poultryfarm.clients.TcpClient;
 import com.transfer.domain.TransferEntity;
 import com.transfer.serializers.EntitySerializer;
 import com.transfer.serializers.TextEntitySerializer;

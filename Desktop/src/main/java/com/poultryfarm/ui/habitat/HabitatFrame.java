@@ -18,7 +18,15 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     private final JButton stopButton = new JButton("Stop");
     private final JButton pauseButton = new JButton("Pause");
     private final JButton resumeButton = new JButton("Resume");
+    private final JButton sendButton = new JButton("Send");
+    private final JButton receiveButton = new JButton("Receive");
+    private final JButton getByIndexButton = new JButton("Get");
+    private final JButton removeByIndexButton = new JButton("Remove");
+    private final JButton countButton = new JButton("Count");
     private final JFileChooser fileDialog = new JFileChooser();
+    private final JSpinner getIndexSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+    private final JSpinner removeIndexSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+    private final JComboBox<String> serverComboBox = new JComboBox<>();
     private final List<LoadEntityListener> loadEntityListeners = new LinkedList<>();
     private final List<SaveEntityListener> saveEntityListeners = new LinkedList<>();
 
@@ -33,6 +41,8 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
 
         add(entityPanel, BorderLayout.CENTER);
         JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS));
+        JPanel flowControlPanel = new JPanel();
         stopButton.setEnabled(false);
         pauseButton.setEnabled(false);
         resumeButton.setEnabled(false);
@@ -40,10 +50,29 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         stopButton.setFocusable(false);
         pauseButton.setFocusable(false);
         resumeButton.setFocusable(false);
-        bottomPanel.add(startButton);
-        bottomPanel.add(stopButton);
-        bottomPanel.add(pauseButton);
-        bottomPanel.add(resumeButton);
+        flowControlPanel.add(startButton);
+        flowControlPanel.add(stopButton);
+        flowControlPanel.add(pauseButton);
+        flowControlPanel.add(resumeButton);
+        bottomPanel.add(flowControlPanel);
+        JPanel networkPanel = new JPanel();
+        sendButton.setFocusable(false);
+        receiveButton.setFocusable(false);
+        getByIndexButton.setFocusable(false);
+        receiveButton.setFocusable(false);
+        removeByIndexButton.setFocusable(false);
+        JPanel getRemovePanel = new JPanel();
+        networkPanel.add(sendButton);
+        networkPanel.add(receiveButton);
+        getRemovePanel.add(getByIndexButton);
+        getRemovePanel.add(getIndexSpinner);
+        getRemovePanel.add(removeByIndexButton);
+        getRemovePanel.add(removeIndexSpinner);
+        networkPanel.add(serverComboBox);
+        networkPanel.add(countButton);
+        bottomPanel.add(networkPanel);
+        bottomPanel.add(getRemovePanel);
+        bottomPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         add(bottomPanel, BorderLayout.SOUTH);
 
         setTitle("Poultry farm");
@@ -123,6 +152,50 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
     @Override
     public void addWindowAction(WindowListener l) {
         addWindowListener(l);
+    }
+
+    @Override
+    public void addSendEntitiesActionListener(ActionListener l) {
+        sendButton.addActionListener(l);
+    }
+
+    @Override
+    public void addReceiveEntitiesActionListener(ActionListener l) {
+        receiveButton.addActionListener(l);
+    }
+
+    @Override
+    public void addGetEntityIndexListener(IndexListener l) {
+        getByIndexButton.addActionListener((e) -> {
+            Integer index = (Integer) getIndexSpinner.getValue();
+            l.onIndexSelected(index);
+        });
+    }
+
+    @Override
+    public void addRemovingEntityIndexListener(IndexListener l) {
+        removeByIndexButton.addActionListener((e) -> {
+            Integer index = (Integer) removeIndexSpinner.getValue();
+            l.onIndexSelected(index);
+        });
+    }
+
+    @Override
+    public void addCountButtonActionListener(ActionListener l) {
+        countButton.addActionListener(l);
+    }
+
+    @Override
+    public void addServerName(String name) {
+        serverComboBox.addItem(name);
+    }
+
+    @Override
+    public void addServerNameListener(StringListener l) {
+        serverComboBox.addItemListener((e -> {
+            String serverName = (String) serverComboBox.getSelectedItem();
+            l.onStringSelected(serverName);
+        }));
     }
 
     @Override

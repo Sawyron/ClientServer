@@ -48,6 +48,20 @@ public interface GraphicEntityView {
 
     void addWindowAction(WindowListener l);
 
+    void addSendEntitiesActionListener(ActionListener l);
+
+    void addReceiveEntitiesActionListener(ActionListener l);
+
+    void addGetEntityIndexListener(IndexListener l);
+
+    void addRemovingEntityIndexListener(IndexListener l);
+
+    void addCountButtonActionListener(ActionListener l);
+
+    void addServerName(String name);
+
+    void addServerNameListener(StringListener l);
+
     int getWidth();
 
     int getHeight();

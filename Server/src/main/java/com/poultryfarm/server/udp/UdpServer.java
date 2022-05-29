@@ -11,6 +11,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,10 +36,18 @@ public class UdpServer implements Server {
                 String request = new String(packet.getData());
                 executorService.submit(() -> {
                     String[] requestLines = request.split("\n");
-                    String[] requestArgs = requestLines[0].split("/");
+                    String[] requestArgs = requestLines[0].split("\\?")[0].split("/");
                     String method = requestArgs[0];
                     if (method.equalsIgnoreCase("GET")) {
-                        handleGet(requestArgs[1], packet.getPort(), packet.getAddress());
+                        Properties properties = new Properties();
+                        if (request.contains("?")) {
+                            String getParameters = request.split("\\?")[1];
+                            for (String pair : getParameters.split("&")) {
+                                String[] keyValue = pair.split("=");
+                                properties.setProperty(keyValue[0], keyValue[1]);
+                            }
+                        }
+                        handleGet(requestArgs[1], packet.getPort(), packet.getAddress(), properties);
                     }
                     if (method.equalsIgnoreCase("POST")) {
                         StringBuilder dataBuilder = new StringBuilder();
@@ -70,12 +79,12 @@ public class UdpServer implements Server {
         postHandlers.put(handlerName, handler);
     }
 
-    private void handleGet(String handlerName, int port, InetAddress address) {
+    private void handleGet(String handlerName, int port, InetAddress address, Properties properties) {
         GetHandler handler = getHandlers.get(handlerName);
         if (handler == null) {
             return;
         }
-        byte[] data = handler.handle().getBytes();
+        byte[] data = handler.handle(properties).getBytes();
         DatagramPacket packet = new DatagramPacket(data, 0, data.length, address, port);
         try {
             socket.send(packet);
