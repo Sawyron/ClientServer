@@ -68,40 +68,65 @@ public class EntityController {
         view.addSendEntitiesActionListener((e) -> {
             executorService.submit(() -> {
                 List<TransferEntity> transferEntities = getAllTransferEntities();
-                entityClient.sendEntities(transferEntities);
+                try {
+                    entityClient.sendEntities(transferEntities);
+                } catch (Exception exception) {
+                    messageService.showError(exception.getMessage());
+                }
             });
         });
         view.addReceiveEntitiesActionListener((e) -> {
             executorService.submit(() -> {
-                List<TransferEntity> transferEntities = entityClient.receiveEntities();
-                addTransferEntities(transferEntities);
+                try {
+                    List<TransferEntity> transferEntities = entityClient.receiveEntities();
+                    addTransferEntities(transferEntities);
+                } catch (Exception exception) {
+                    messageService.showError(exception.getMessage());
+                }
             });
         });
         view.addGetEntityIndexListener((index) -> {
             executorService.submit(() -> {
-                TransferEntity transferEntity = entityClient.getEntityAt(index);
-                if (transferEntity.getType().equalsIgnoreCase("null")) {
-                    return;
+                try {
+                    TransferEntity transferEntity = entityClient.getEntityAt(index);
+                    if (transferEntity.getType().equalsIgnoreCase("null")) {
+                        return;
+                    }
+                    addTransferEntities(List.of(transferEntity));
+                } catch (Exception e) {
+                    messageService.showError(e.getMessage());
                 }
-                addTransferEntities(List.of(transferEntity));
+            });
+        });
+        view.addRemovingEntityIndexListener((index) -> {
+            executorService.submit(() -> {
+                try {
+                    entityClient.removeAt(index);
+                } catch (Exception e) {
+                    messageService.showError(e.getMessage());
+                }
+            });
+        });
+        view.addCountButtonActionListener((e) -> {
+            executorService.submit(() -> {
+                try {
+                    messageService.showMessage("Entities at server: " + entityClient.getEntitiesCount());
+                } catch (Exception ex) {
+                    messageService.showError(ex.getMessage());
+                }
             });
         });
         view.addServerNameListener((value) -> {
-            executorService.submit(() -> {
-                synchronized (clientMap) {
-                    Client client = clientMap.get(value);
-                    if (client == null) {
-                        return;
-                    }
-                    synchronized (client) {
-                        entityClient.setClient(client);
-                    }
+            synchronized (clientMap) {
+                Client client = clientMap.get(value);
+                if (client == null) {
+                    return;
                 }
-            });
-        });
-        view.addRemovingEntityIndexListener((entityClient::removeAt));
-        view.addCountButtonActionListener((e) -> {
-            messageService.showMessage("Entities at server: " + entityClient.getEntitiesCount());
+                synchronized (client) {
+                    entityClient.setClient(client);
+                }
+            }
+
         });
         view.addWindowAction(new WindowAdapter() {
             @Override

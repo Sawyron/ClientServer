@@ -33,7 +33,7 @@ public class UdpServer implements Server {
             DatagramPacket packet = new DatagramPacket(buff, 0, buff.length);
             try {
                 socket.receive(packet);
-                String request = new String(packet.getData());
+                String request = new String(packet.getData(), 0, packet.getLength());
                 executorService.submit(() -> {
                     String[] requestLines = request.split("\n");
                     String[] requestArgs = requestLines[0].split("\\?")[0].split("/");
@@ -41,7 +41,7 @@ public class UdpServer implements Server {
                     if (method.equalsIgnoreCase("GET")) {
                         Properties properties = new Properties();
                         if (request.contains("?")) {
-                            String getParameters = request.split("\\?")[1];
+                            String getParameters = request.replaceAll("\n", "").split("\\?")[1];
                             for (String pair : getParameters.split("&")) {
                                 String[] keyValue = pair.split("=");
                                 properties.setProperty(keyValue[0], keyValue[1]);
