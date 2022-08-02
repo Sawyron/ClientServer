@@ -61,6 +61,7 @@ public class HabitatFrame extends JFrame implements GraphicEntityView {
         getByIndexButton.setFocusable(false);
         receiveButton.setFocusable(false);
         removeByIndexButton.setFocusable(false);
+        countButton.setFocusable(false);
         JPanel getRemovePanel = new JPanel();
         networkPanel.add(sendButton);
         networkPanel.add(receiveButton);

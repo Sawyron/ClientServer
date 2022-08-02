@@ -6,7 +6,7 @@ import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.HabitatModel;
 import com.poultryfarm.services.EntitySpawn;
 import com.poultryfarm.services.MessageService;
-import com.poultryfarm.services.RunnableWorker;
+import com.poultryfarm.services.async.TaskExecutor;
 import com.poultryfarm.services.network.EntityClient;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;
 import com.transfer.domain.TransferEntity;
@@ -14,150 +14,206 @@ import com.transfer.serializers.EntitySerializer;
 import com.transfer.serializers.ExtensionFileEntitySerializer;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class EntityController {
+public class EntityController extends AbstractEntityController {
+
     private final HabitatModel model;
-    private final GraphicEntityView view;
     private final MessageService messageService;
     private final EntityClient entityClient;
     private final Map<String, Client> clientMap = new HashMap<>();
     private final List<EntitySpawn> entitySpawns = new LinkedList<>();
-
-    private final List<RunnableWorker> workers = new LinkedList<>();
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
-
+    private final List<ExtensionFileEntitySerializer> fIleEntitySerializers = new LinkedList<>();
+    private final TaskExecutor executor;
     private long viewUpdatePeriodInMs = 20;
     private long movementPeriodInMs = 50;
     private long checkDeadPeriod = 500;
     private long pauseTime;
-    private final List<ExtensionFileEntitySerializer> fIleEntitySerializers = new LinkedList<>();
 
     public EntityController(HabitatModel model, GraphicEntityView view, MessageService messageService, EntityClient entityClient) {
+        super(view);
         this.model = model;
-        this.view = view;
-        this.entityClient = entityClient;
         this.messageService = messageService;
-        view.addStartActionListener((e) -> {
-            view.setActiveState();
-            resume();
-            synchronized (model) {
-                model.clear();
+        this.entityClient = entityClient;
+        executor = new TaskExecutor((e) -> {
+            messageService.showError(e.getMessage());
+            onExit();
+        });
+    }
+
+    @Override
+    public void run() {
+        executor.addRepeatedTask(view::moveEntities, viewUpdatePeriodInMs);
+        executor.addRepeatedTask(this::removeDeadEntities, movementPeriodInMs);
+        for (EntitySpawn entitySpawn : entitySpawns) {
+            executor.addRepeatedTask(() -> {
+                Random random = new Random();
+                spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entitySpawn);
+            }, entitySpawn.getSpawnPeriodInMs());
+        }
+        executor.pauseRepeatedTasks();
+        executor.runRepeatedTasks();
+        super.run();
+    }
+
+    @Override
+    public void start() {
+        view.setActiveState();
+        resume();
+        synchronized (model) {
+            model.clear();
+        }
+        synchronized (view) {
+            view.clearEntities();
+        }
+
+    }
+
+    @Override
+    public void stop() {
+        pause();
+        view.setStoppedState();
+    }
+
+    @Override
+    public void pause() {
+        executor.pauseRepeatedTasks();
+        view.setPausedState();
+        pauseTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void resume() {
+        executor.resumeRepeatedTasks();
+        view.setResumedState();
+        synchronized (model) {
+            model.increaseLifeTime(System.currentTimeMillis() - pauseTime);
+        }
+    }
+
+    @Override
+    public void onEntityRightClick(String id) {
+        removeEntityById(id);
+    }
+
+    @Override
+    public void onEntityLeftClick(String id) {
+        changeEntityMovingState(id);
+    }
+
+    @Override
+    public void onAreaLeftClick(int x, int y) {
+        spawnRandomEntityAt(x, y);
+    }
+
+    @Override
+    public void loadEntities(File file) {
+        ExtensionFileEntitySerializer serializer = fIleEntitySerializers.stream()
+                .filter(s -> file.getName().endsWith(s.getExtension()))
+                .findFirst()
+                .orElse(null);
+        if (serializer == null) {
+            messageService.showMessage("No serializer for this extension");
+            return;
+        }
+        List<TransferEntity> transferEntities = serializer.loadEntities(file);
+        addTransferEntities(transferEntities);
+    }
+
+    @Override
+    public void saveEntities(File file) {
+        ExtensionFileEntitySerializer serializer = fIleEntitySerializers.stream()
+                .filter(s -> file.getName().endsWith(s.getExtension()))
+                .findFirst()
+                .orElse(null);
+        if (serializer == null) {
+            messageService.showMessage("No serializer for this extension");
+            return;
+        }
+        List<TransferEntity> transferEntities = getAllTransferEntities();
+        serializer.saveEntities(transferEntities, file);
+    }
+
+    @Override
+    public void sendEntitiesToServer() {
+        executor.executeTask(() -> {
+            List<TransferEntity> transferEntities = getAllTransferEntities();
+            try {
+                entityClient.sendEntities(transferEntities);
+            } catch (Exception exception) {
+                messageService.showError(exception.getMessage());
             }
-            synchronized (view) {
-                view.clearEntities();
+        });
+    }
+
+    @Override
+    public void receiveEntitiesFromServer() {
+        executor.executeTask(() -> {
+            try {
+                List<TransferEntity> transferEntities = entityClient.receiveEntities();
+                addTransferEntities(transferEntities);
+            } catch (Exception exception) {
+                messageService.showError(exception.getMessage());
             }
         });
-        view.addStopActionListener((e) -> {
-            pause();
-            view.setStoppedState();
-        });
-        view.addPauseActionListener((e) -> pause());
-        view.addResumeActionLister((e) -> resume());
-        view.addEntityRightButtonClickedListener(this::removeEntityById);
-        view.addAreaPointLeftButtonClickedListener(this::spawnRandomEntityAt);
-        view.addEntityLeftButtonClickedListener(this::changeEntityMovingState);
-        view.addLoadEntityListener(this::loadEntities);
-        view.addSaveEntityListener(this::saveEntities);
-        view.addSendEntitiesActionListener((e) -> {
-            executorService.submit(() -> {
-                List<TransferEntity> transferEntities = getAllTransferEntities();
-                try {
-                    entityClient.sendEntities(transferEntities);
-                } catch (Exception exception) {
-                    messageService.showError(exception.getMessage());
-                }
-            });
-        });
-        view.addReceiveEntitiesActionListener((e) -> {
-            executorService.submit(() -> {
-                try {
-                    List<TransferEntity> transferEntities = entityClient.receiveEntities();
-                    addTransferEntities(transferEntities);
-                } catch (Exception exception) {
-                    messageService.showError(exception.getMessage());
-                }
-            });
-        });
-        view.addGetEntityIndexListener((index) -> {
-            executorService.submit(() -> {
-                try {
-                    TransferEntity transferEntity = entityClient.getEntityAt(index);
-                    if (transferEntity.getType().equalsIgnoreCase("null")) {
-                        return;
-                    }
-                    addTransferEntities(List.of(transferEntity));
-                } catch (Exception e) {
-                    messageService.showError(e.getMessage());
-                }
-            });
-        });
-        view.addRemovingEntityIndexListener((index) -> {
-            executorService.submit(() -> {
-                try {
-                    entityClient.removeAt(index);
-                } catch (Exception e) {
-                    messageService.showError(e.getMessage());
-                }
-            });
-        });
-        view.addCountButtonActionListener((e) -> {
-            executorService.submit(() -> {
-                try {
-                    messageService.showMessage("Entities at server: " + entityClient.getEntitiesCount());
-                } catch (Exception ex) {
-                    messageService.showError(ex.getMessage());
-                }
-            });
-        });
-        view.addServerNameListener((value) -> {
-            synchronized (clientMap) {
-                Client client = clientMap.get(value);
-                if (client == null) {
+    }
+
+    @Override
+    public void getEntityFromServerByIndex(int index) {
+        executor.executeTask(() -> {
+            try {
+                TransferEntity transferEntity = entityClient.getEntityAt(index);
+                if (transferEntity.getType().equalsIgnoreCase("null")) {
                     return;
                 }
-                synchronized (client) {
-                    entityClient.setClient(client);
-                }
-            }
-
-        });
-        view.addWindowAction(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                super.windowClosing(e);
-                shutdown();
-                System.exit(0);
+                addTransferEntities(List.of(transferEntity));
+            } catch (Exception e) {
+                messageService.showError(e.getMessage());
             }
         });
-
     }
 
-    public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
-        view.addFileFilter(new FileNameExtensionFilter(description, extension), extension);
-        fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
+    @Override
+    public void removeEntityFromServerByIndex(int index) {
+        executor.executeTask(() -> {
+            try {
+                entityClient.removeAt(index);
+            } catch (Exception e) {
+                messageService.showError(e.getMessage());
+            }
+        });
     }
 
-    public void addServerClient(Client client, String name) {
-        clientMap.put(name, client);
+    @Override
+    public void countEntitiesOnServer() {
+        executor.executeTask(() -> {
+            try {
+                messageService.showMessage("Entities at server: " + entityClient.getEntitiesCount());
+            } catch (Exception ex) {
+                messageService.showError(ex.getMessage());
+            }
+        });
     }
 
-    public void run() {
-        setupWorkers();
-        for (String server : clientMap.keySet()) {
-            view.addServerName(server);
+    @Override
+    public void onServerChanged(String serverName) {
+        synchronized (clientMap) {
+            Client client = clientMap.get(serverName);
+            if (client == null) {
+                return;
+            }
+            synchronized (entityClient) {
+                entityClient.setClient(client);
+            }
         }
-        view.run();
-        for (RunnableWorker worker : workers) {
-            worker.pause();
-            executorService.submit(worker);
-        }
+    }
+
+    @Override
+    public void onExit() {
+        shutdown();
+        System.exit(0);
     }
 
     public long getViewUpdatePeriodInMs() {
@@ -184,72 +240,18 @@ public class EntityController {
         this.checkDeadPeriod = checkDeadPeriod;
     }
 
-    private void setupWorkers() {
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                synchronized (view) {
-                    view.moveEntities();
-                }
-                try {
-                    Thread.sleep(movementPeriodInMs);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    throw new ControllerException(e.getMessage(), e);
-                }
-            }
-        });
-        workers.add(new RunnableWorker() {
-            @Override
-            protected void doUnitOfWork() {
-                try {
-                    Thread.sleep(checkDeadPeriod);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    throw new ControllerException(e.getMessage(), e);
-                }
-                removeDeadEntities();
-            }
-        });
-        for (EntitySpawn entitySpawn : entitySpawns) {
-            workers.add(new RunnableWorker() {
-                @Override
-                protected void doUnitOfWork() {
-                    Random random = new Random();
-                    spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entitySpawn);
-                    try {
-                        Thread.sleep(entitySpawn.getSpawnPeriodInMs());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        throw new ControllerException(e.getMessage(), e);
-                    }
-                }
-            });
-        }
-    }
-
-    private void changeEntityMovingState(String id) {
-        synchronized (view) {
-            GraphicEntity entity = view.getEntityById(id);
-            if (entity.getDx() == 0 && entity.getDy() == 0) {
-                Random random = new Random();
-                entity.setDx(random.nextInt(10) - 5);
-                entity.setDy(random.nextInt(10) - 5);
-            } else {
-                entity.setDy(0);
-                entity.setDx(0);
-            }
-        }
-    }
-
-    private void spawnRandomEntityAt(int x, int y) {
-        Random random = new Random();
-        EntitySpawn spawn = entitySpawns.get(random.nextInt(entitySpawns.size()));
-        spawnEntity(x, y, spawn);
-    }
-
     public void addEntitySpawn(EntitySpawn entitySpawn) {
         entitySpawns.add(entitySpawn);
+    }
+
+    public void addFileEntitySerializer(String description, String extension, EntitySerializer serializer) {
+        view.addFileFilter(new FileNameExtensionFilter(description, extension), extension);
+        fIleEntitySerializers.add(new ExtensionFileEntitySerializer(serializer, description, extension));
+    }
+
+    public void addServerClient(Client client, String name) {
+        clientMap.put(name, client);
+        view.addServerName(name);
     }
 
     private void spawnEntity(int x, int y, int dx, int dy, EntitySpawn entitySpawn) {
@@ -271,6 +273,12 @@ public class EntityController {
         spawnEntity(x, y, random.nextInt(10) - 5, random.nextInt(10) - 5, entitySpawn);
     }
 
+    private void spawnRandomEntityAt(int x, int y) {
+        Random random = new Random();
+        EntitySpawn spawn = entitySpawns.get(random.nextInt(entitySpawns.size()));
+        spawnEntity(x, y, spawn);
+    }
+
     private void removeEntityById(String id) {
         synchronized (view) {
             view.removeEntity(id);
@@ -280,50 +288,18 @@ public class EntityController {
         }
     }
 
-    private void removeDeadEntities() {
-        List<String> deadEntitiesIds = List.copyOf(model.getDeadEntitiesIds(System.currentTimeMillis()));
-        for (String id : deadEntitiesIds) {
-            removeEntityById(id);
+    private void changeEntityMovingState(String id) {
+        synchronized (view) {
+            GraphicEntity entity = view.getEntityById(id);
+            if (entity.getDx() == 0 && entity.getDy() == 0) {
+                Random random = new Random();
+                entity.setDx(random.nextInt(10) - 5);
+                entity.setDy(random.nextInt(10) - 5);
+            } else {
+                entity.setDy(0);
+                entity.setDx(0);
+            }
         }
-    }
-
-    private void shutdown() {
-        for (RunnableWorker worker : workers) {
-            worker.finish();
-        }
-        view.setStoppedState();
-        executorService.shutdown();
-    }
-
-    private void pause() {
-        for (RunnableWorker worker : workers) {
-            worker.pause();
-        }
-        view.setPausedState();
-        pauseTime = System.currentTimeMillis();
-    }
-
-    private void resume() {
-        for (RunnableWorker worker : workers) {
-            worker.resume();
-        }
-        view.setResumedState();
-        synchronized (model) {
-            model.increaseLifeTime(System.currentTimeMillis() - pauseTime);
-        }
-    }
-
-    private void saveEntities(File file) {
-        ExtensionFileEntitySerializer serializer = fIleEntitySerializers.stream()
-                .filter(s -> file.getName().endsWith(s.getExtension()))
-                .findFirst()
-                .orElse(null);
-        if (serializer == null) {
-            messageService.showMessage("No serializer for this extension");
-            return;
-        }
-        List<TransferEntity> transferEntities = getAllTransferEntities();
-        serializer.saveEntities(transferEntities, file);
     }
 
     private List<TransferEntity> getAllTransferEntities() {
@@ -348,17 +324,11 @@ public class EntityController {
         return transferEntities;
     }
 
-    private void loadEntities(File file) {
-        ExtensionFileEntitySerializer serializer = fIleEntitySerializers.stream()
-                .filter(s -> file.getName().endsWith(s.getExtension()))
-                .findFirst()
-                .orElse(null);
-        if (serializer == null) {
-            messageService.showMessage("No serializer for this extension");
-            return;
+    private void removeDeadEntities() {
+        List<String> deadEntitiesIds = List.copyOf(model.getDeadEntitiesIds(System.currentTimeMillis()));
+        for (String id : deadEntitiesIds) {
+            removeEntityById(id);
         }
-        List<TransferEntity> transferEntities = serializer.loadEntities(file);
-        addTransferEntities(transferEntities);
     }
 
     private void addTransferEntities(Collection<TransferEntity> transferEntities) {
@@ -375,4 +345,8 @@ public class EntityController {
         }
     }
 
+    private void shutdown() {
+        view.setStoppedState();
+        executor.shutdown();
+    }
 }
