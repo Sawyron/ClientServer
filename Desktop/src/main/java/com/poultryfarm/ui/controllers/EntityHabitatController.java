@@ -1,4 +1,4 @@
-package com.poultryfarm.controllers;
+package com.poultryfarm.ui.controllers;
 
 public interface EntityHabitatController {
     void removeEntityById(String id);

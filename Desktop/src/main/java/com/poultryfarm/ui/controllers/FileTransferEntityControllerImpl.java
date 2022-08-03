@@ -1,4 +1,4 @@
-package com.poultryfarm.controllers;
+package com.poultryfarm.ui.controllers;
 
 import com.poultryfarm.services.MessageService;
 import com.poultryfarm.ui.graphicentity.GraphicEntityView;

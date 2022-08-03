@@ -1,4 +1,4 @@
-package com.poultryfarm.controllers;
+package com.poultryfarm.ui.controllers;
 
 import com.poultryfarm.domain.GraphicEntity;
 import com.poultryfarm.domain.HabitatModel;
