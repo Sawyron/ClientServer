@@ -6,15 +6,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-public abstract class AbstractEntityController implements Controller {
-    protected final GraphicEntityView view;
+public abstract class AbstractEntityController implements EntityViewController, FileTransferEntityController, NetworkEntityController {
 
     public AbstractEntityController(GraphicEntityView view) {
-        this.view = view;
-        connectObservers();
+        connectObservers(view);
     }
 
-    private void connectObservers() {
+    private void connectObservers(GraphicEntityView view) {
         view.addStartActionListener(e -> start());
         view.addStopActionListener(e -> stop());
         view.addPauseActionListener(e -> pause());
@@ -42,57 +40,73 @@ public abstract class AbstractEntityController implements Controller {
 
     @Override
     public void run() {
-        view.run();
     }
 
+    @Override
     public void start() {
     }
 
+    @Override
     public void stop() {
     }
 
+    @Override
     public void pause() {
     }
 
+    @Override
     public void resume() {
     }
 
+    @Override
     public void onEntityRightClick(String id) {
     }
 
+    @Override
     public void onEntityLeftClick(String id) {
     }
 
+    @Override
     public void onAreaRightClick(int x, int y) {
     }
 
+    @Override
     public void onAreaLeftClick(int x, int y) {
     }
 
+    @Override
     public void loadEntities(File file) {
     }
 
+    @Override
     public void saveEntities(File file) {
     }
 
+    @Override
     public void sendEntitiesToServer() {
     }
 
+    @Override
     public void receiveEntitiesFromServer() {
     }
 
+    @Override
     public void getEntityFromServerByIndex(int index) {
     }
 
+    @Override
     public void removeEntityFromServerByIndex(int index) {
     }
 
+    @Override
     public void countEntitiesOnServer() {
     }
 
+    @Override
     public void onServerChanged(String serverName) {
     }
 
+    @Override
     public void onExit() {
     }
 }

@@ -18,8 +18,9 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class EntityController extends AbstractEntityController {
+public class EntityControllerImpl extends AbstractEntityController {
 
+    private final GraphicEntityView view;
     private final HabitatModel model;
     private final MessageService messageService;
     private final EntityClient entityClient;
@@ -32,8 +33,9 @@ public class EntityController extends AbstractEntityController {
     private long checkDeadPeriod = 500;
     private long pauseTime;
 
-    public EntityController(HabitatModel model, GraphicEntityView view, MessageService messageService, EntityClient entityClient) {
+    public EntityControllerImpl(HabitatModel model, GraphicEntityView view, MessageService messageService, EntityClient entityClient) {
         super(view);
+        this.view = view;
         this.model = model;
         this.messageService = messageService;
         this.entityClient = entityClient;
@@ -53,14 +55,13 @@ public class EntityController extends AbstractEntityController {
                 spawnEntity(random.nextInt(view.getWidth()), random.nextInt(view.getHeight()), entitySpawn);
             }, entitySpawn.getSpawnPeriodInMs());
         }
-        executor.pauseRepeatedTasks();
-        executor.runRepeatedTasks();
-        super.run();
+        view.run();
     }
 
     @Override
     public void start() {
         view.setActiveState();
+        executor.runRepeatedTasks();
         resume();
         synchronized (model) {
             model.clear();

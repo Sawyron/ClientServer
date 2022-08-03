@@ -4,8 +4,8 @@ import com.poultryfarm.domain.GraphicEntity;
 
 public class FabricEntitySpawn implements EntitySpawn {
     private final String type;
-    private long lifeTime;
-    private long spawnPeriod;
+    private final long lifeTime;
+    private final long spawnPeriod;
     private final GraphicEntityFactory factory;
 
     public FabricEntitySpawn(String type, long lifeTime, long spawnPeriod, GraphicEntityFactory factory) {
@@ -31,18 +31,8 @@ public class FabricEntitySpawn implements EntitySpawn {
     }
 
     @Override
-    public void setLifeTime(long lifeTime) {
-        this.lifeTime = lifeTime;
-    }
-
-    @Override
     public long getSpawnPeriodInMs() {
         return spawnPeriod;
-    }
-
-    @Override
-    public void setSpawnPeriod(long spawnPeriod) {
-        this.spawnPeriod = spawnPeriod;
     }
 
     @Override

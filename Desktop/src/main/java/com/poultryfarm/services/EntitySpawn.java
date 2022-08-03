@@ -9,11 +9,7 @@ public interface EntitySpawn {
 
     long getLifeTimeInMs();
 
-    void setLifeTime(long lifeTime);
-
     long getSpawnPeriodInMs();
-
-    void setSpawnPeriod(long spawnPeriod);
 
     String getType();
 }

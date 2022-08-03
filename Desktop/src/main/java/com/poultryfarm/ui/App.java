@@ -3,12 +3,10 @@ package com.poultryfarm.ui;
 import com.poultryfarm.clients.Client;
 import com.poultryfarm.clients.TcpClient;
 import com.poultryfarm.clients.UdpClient;
-import com.poultryfarm.controllers.EntityController;
+import com.poultryfarm.controllers.*;
 import com.poultryfarm.domain.HabitatModel;
-import com.poultryfarm.services.FabricEntitySpawn;
-import com.poultryfarm.services.ImageGraphicEntityFactory;
-import com.poultryfarm.services.JMessageService;
-import com.poultryfarm.services.MessageService;
+import com.poultryfarm.services.*;
+import com.poultryfarm.services.async.TaskExecutor;
 import com.poultryfarm.services.network.EntityClient;
 import com.poultryfarm.ui.habitat.HabitatFrame;
 import com.transfer.serializers.BinarySerializer;
@@ -40,16 +38,29 @@ public class App {
             Client updClient = new UdpClient(8081, InetAddress.getLocalHost());
             EntityClient entityClient = new EntityClient(tcpClient, new TextEntitySerializer(), "text");
 
-            EntityController controller = new EntityController(model, frame, messageService, entityClient);
-            controller.addServerClient(tcpClient, "TCP");
-            controller.addServerClient(updClient, "UDP");
-            controller.addEntitySpawn(new FabricEntitySpawn("Bird", 10_000, 5_000, birdFactory));
-            controller.addEntitySpawn(new FabricEntitySpawn("Nestling", 10_000, 5_000, nestlingFactory));
-            controller.addFileEntitySerializer("Binary file (*.bn)", "bn", new BinarySerializer());
-            controller.addFileEntitySerializer("Text file (*.txt)", "txt", new TextEntitySerializer());
-            controller.addFileEntitySerializer("XML file (*.xml)", "xml", new XmlSerializer());
-            controller.addFileEntitySerializer("Object file (*.obj)", "obj", new ObjectSerializer());
-            controller.run();
+            ExceptionHandler handler = (e) -> {
+                messageService.showError(e.getMessage());
+            };
+            TaskExecutor executor = new TaskExecutor(handler);
+
+            EntityHabitatController habitatController = new EntityHabitatControllerImpl(frame, model);
+            EntitySpawnController spawnController = new EntitySpawnControllerImpl(frame, model, handler);
+            EntityViewController viewController = new EntityViewControllerImpl(frame, model, habitatController, spawnController, executor);
+            TransferEntityController transferController = new TransferEntityControllerImpl(frame, model, spawnController, executor);
+            FileTransferEntityController fileController = new FileTransferEntityControllerImpl(frame, transferController, messageService);
+            NetworkEntityController networkController = new NetworkEntityControllerImpl(frame, entityClient, transferController, executor, messageService, handler);
+            MainController mainController = new MainController(frame, viewController, habitatController, fileController, networkController);
+
+            networkController.addServerClient(tcpClient, "TCP");
+            networkController.addServerClient(updClient, "UDP");
+            spawnController.addEntitySpawn(new FabricEntitySpawn("Bird", 10_000, 5_000, birdFactory));
+            spawnController.addEntitySpawn(new FabricEntitySpawn("Nestling", 10_000, 5_000, nestlingFactory));
+            fileController.addFileEntitySerializer("Binary file (*.bn)", "bn", new BinarySerializer());
+            fileController.addFileEntitySerializer("Text file (*.txt)", "txt", new TextEntitySerializer());
+            fileController.addFileEntitySerializer("XML file (*.xml)", "xml", new XmlSerializer());
+            fileController.addFileEntitySerializer("Object file (*.obj)", "obj", new ObjectSerializer());
+
+            mainController.run();
         } catch (Exception e) {
             e.printStackTrace();
             messageService.showMessage(e.getMessage());
